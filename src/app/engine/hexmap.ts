@@ -21,70 +21,96 @@ export function isPointInPolygon(point: Coords, polygon: Coords[]): boolean {
 }
 
 // ─── Zone definitions ──────────────────────────────────────────────────────────
+// Polygons define real geographic bounding boxes across Mysuru city.
+// The hex grid spans: lat 12.241–12.340, lng 76.590–76.725
+// Zones are laid out as a city map — each covers a distinct real neighborhood.
 
 export const ZONE_DEFS: ZoneDef[] = [
   {
-    id: "heritage_core",
-    name: "Heritage Core",
-    digipinCode: "MYS-4N2K",
+    // North-West quadrant: Devaraja market, silk bazaar, Chamaraja ward
+    id: "artisan_quarter",
+    name: "Artisan Quarter",
+    digipinCode: "MYS-7R8P",
     polygon: [
-      { lat: 12.3100, lng: 76.6400 },
-      { lat: 12.3150, lng: 76.6500 },
-      { lat: 12.3050, lng: 76.6600 },
-      { lat: 12.2950, lng: 76.6500 },
-      { lat: 12.3000, lng: 76.6400 }
+      { lat: 12.3400, lng: 76.5900 },
+      { lat: 12.3400, lng: 76.6350 },
+      { lat: 12.3050, lng: 76.6350 },
+      { lat: 12.3050, lng: 76.5900 },
     ],
-    totalGems: 12,
-    multiplier: 3.0,
+    totalGems: 9,
+    multiplier: 2.0,
     unlockRequirement: { type: "none" },
   },
   {
+    // North-East quadrant: St. Philomena's Church, Nazarbad, Vijayanagar
+    id: "street_food_belt",
+    name: "Street Food Belt",
+    digipinCode: "MYS-1F5Q",
+    polygon: [
+      { lat: 12.3400, lng: 76.6350 },
+      { lat: 12.3400, lng: 76.7250 },
+      { lat: 12.3050, lng: 76.7250 },
+      { lat: 12.3050, lng: 76.6350 },
+    ],
+    totalGems: 8,
+    multiplier: 1.5,
+    unlockRequirement: { type: "level", level: 1 },
+  },
+  {
+    // Middle-West: Kuvempunagar, University of Mysore, Kukkarahalli Lake
     id: "kuvempunagar",
     name: "Kuvempunagar",
     digipinCode: "MYS-8K9V",
     polygon: [
-      { lat: 12.2900, lng: 76.6150 },
-      { lat: 12.2900, lng: 76.6350 },
+      { lat: 12.3050, lng: 76.5900 },
+      { lat: 12.3050, lng: 76.6350 },
       { lat: 12.2700, lng: 76.6350 },
-      { lat: 12.2700, lng: 76.6150 }
+      { lat: 12.2700, lng: 76.5900 },
     ],
     totalGems: 10,
     multiplier: 2.5,
     unlockRequirement: { type: "none" },
   },
   {
-    id: "artisan_quarter",
-    name: "Artisan Quarter",
-    digipinCode: "MYS-7R8P",
-    totalGems: 9,
+    // Middle-Centre: Mysore Palace, Zoo, Jaganmohan Palace, Fort
+    id: "heritage_core",
+    name: "Heritage Core",
+    digipinCode: "MYS-4N2K",
+    polygon: [
+      { lat: 12.3050, lng: 76.6350 },
+      { lat: 12.3050, lng: 76.6700 },
+      { lat: 12.2700, lng: 76.6700 },
+      { lat: 12.2700, lng: 76.6350 },
+    ],
+    totalGems: 12,
+    multiplier: 3.0,
+    unlockRequirement: { type: "none" },
+  },
+  {
+    // Middle-East: Chamundi Hill foothills, Lalitha Mahal, Yadavagiri
+    id: "fort_zone",
+    name: "Fort Zone",
+    digipinCode: "MYS-9T4L",
+    polygon: [
+      { lat: 12.3050, lng: 76.6700 },
+      { lat: 12.3050, lng: 76.7250 },
+      { lat: 12.2700, lng: 76.7250 },
+      { lat: 12.2700, lng: 76.6700 },
+    ],
+    totalGems: 7,
     multiplier: 2.0,
     unlockRequirement: { type: "gems_in_zone", zoneId: "heritage_core", gemCount: 3 },
   },
   {
-    id: "street_food_belt",
-    name: "Street Food Belt",
-    digipinCode: "MYS-1F5Q",
-    totalGems: 8,
-    multiplier: 1.5,
-    unlockRequirement: { type: "level", level: 1 },
-  },
-  {
-    id: "fort_zone",
-    name: "Fort Zone",
-    digipinCode: "MYS-9T4L",
-    totalGems: 7,
-    multiplier: 2.0,
-    unlockRequirement: { type: "badge", badge: "zone_master" },
-  },
-  {
+    // South: Chamundi Hill, Brindavan Gardens area, Bogadi, south outskirts
     id: "silk_district",
     name: "Silk District",
     digipinCode: "MYS-3K6W",
     polygon: [
-      { lat: 12.2800, lng: 76.6400 },
-      { lat: 12.2900, lng: 76.6500 },
-      { lat: 12.2850, lng: 76.6600 },
-      { lat: 12.2750, lng: 76.6500 }
+      { lat: 12.2700, lng: 76.5900 },
+      { lat: 12.2700, lng: 76.7250 },
+      { lat: 12.2400, lng: 76.7250 },
+      { lat: 12.2400, lng: 76.5900 },
     ],
     totalGems: 6,
     multiplier: 2.5,

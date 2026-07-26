@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useApp, useColors } from "../../context/AppContext";
 import { useGame } from "../../store/GameStore";
-import { ZONE_DEFS, getHexDisplayStatus, generateGeoHexGrid } from "../../engine/hexmap";
+import { ZONE_DEFS, getHexDisplayStatus, generateGeoHexGrid, getZoneForCoordinate } from "../../engine/hexmap";
 import { allPlaces } from "../../data/places";
 
 type HexStatus = "explored" | "active" | "gem" | "locked";
@@ -112,8 +112,11 @@ export function HexMap() {
     };
     return geoHexes.map((geoHex) => {
       const r = geoHex.row; const c = geoHex.col;
-      const zoneIdx = Math.floor((r / 12) * 2.5 + (c / 14) * 2.5) % ZONE_DEFS.length;
-      const zone = ZONE_DEFS[zoneIdx];
+      // Assign zone by actual GPS coordinates — each hex center is checked
+      // against the real geographic bounding polygons of each Mysuru zone
+      const coordZone = getZoneForCoordinate({ lat: geoHex.centerLat, lng: geoHex.centerLng });
+      // Fallback: if no polygon matches (e.g. edge hexes outside defined areas), use Heritage Core
+      const zone = coordZone ?? ZONE_DEFS.find(z => z.id === "heritage_core") ?? ZONE_DEFS[0];
       const gemId = gemCoords[`${r},${c}`] || null;
       const gemData = gemId ? allGems.find(x => x.id === gemId) : null;
       const isUnlocked = isZoneUnlockedFn(zone.id);
