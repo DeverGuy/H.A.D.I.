@@ -211,7 +211,28 @@ export function HexMap() {
     polygonLayersRef.current.forEach(p => p.remove());
     polygonLayersRef.current = [];
     grid.forEach((zone) => {
+      const zoneInfo = ZONE_DATA[zone.zoneId];
+      const emoji = zoneInfo?.emoji ?? "📍";
       const poly = L.polygon(zone.polygon, { color: hexStatusStrokes[zone.status], fillColor: hexStatusColors[zone.status], fillOpacity: 1, weight: 1.5, opacity: 1 }).addTo(map);
+
+      // Hover tooltip
+      poly.bindTooltip(
+        `<div class="hex-tooltip"><span class="hex-tooltip-emoji">${emoji}</span> ${zone.zoneName}</div>`,
+        { sticky: true, direction: "top", offset: [0, -8], opacity: 1 }
+      );
+
+      // Highlight on hover
+      poly.on("mouseover", () => {
+        if (!(selectedZoneRef.current?.row === zone.row && selectedZoneRef.current?.col === zone.col)) {
+          poly.setStyle({ weight: 2.5, fillOpacity: 0.75 });
+        }
+      });
+      poly.on("mouseout", () => {
+        if (!(selectedZoneRef.current?.row === zone.row && selectedZoneRef.current?.col === zone.col)) {
+          poly.setStyle({ weight: 1.5, fillOpacity: 1 });
+        }
+      });
+
       poly.on("click", (e) => {
         L.DomEvent.stopPropagation(e);
         polygonLayersRef.current.forEach(p => p.setStyle({ weight: 1.5 }));
@@ -321,7 +342,32 @@ export function HexMap() {
           </div>
         </>
       )}
-      <style>{`@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
+      <style>{`
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .hex-tooltip {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 700;
+          font-size: 13px;
+          color: #fff;
+          white-space: nowrap;
+        }
+        .hex-tooltip-emoji { font-size: 15px; }
+        .leaflet-tooltip {
+          background: rgba(13, 40, 40, 0.95) !important;
+          border: 1px solid rgba(255,255,255,0.15) !important;
+          border-radius: 10px !important;
+          padding: 6px 12px !important;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+          backdrop-filter: blur(8px);
+          color: #fff !important;
+        }
+        .leaflet-tooltip::before {
+          border-top-color: rgba(13,40,40,0.95) !important;
+        }
+      `}</style>
     </div>
   );
 }
