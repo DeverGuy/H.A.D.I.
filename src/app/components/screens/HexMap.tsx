@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useApp, useColors } from "../../context/AppContext";
 import { useGame } from "../../store/GameStore";
 import { ZONE_DEFS, getHexDisplayStatus } from "../../engine/hexmap";
+import bgMap from "../../assets/mysore-satellite-bg.png";
 
 type HexStatus = "explored" | "active" | "gem" | "locked";
 
@@ -21,10 +22,10 @@ interface HexZone {
 }
 
 const hexStatusColors: Record<HexStatus, string> = {
-  explored: "#1A5252",
-  active: "#E07B2A",
-  gem: "#C9921F",
-  locked: "rgba(255,255,255,0.15)",
+  explored: "rgba(26, 82, 82, 0.7)", // More translucent
+  active: "rgba(224, 123, 42, 0.7)", 
+  gem: "rgba(201, 146, 31, 0.9)",
+  locked: "rgba(255, 255, 255, 0.05)", // Barely visible over map
 };
 
 const densityConfig = {
@@ -74,8 +75,6 @@ export function HexMap() {
         const isVisited = gemId ? visitedGemIds.has(gemId) : false;
         const isLegendary = gemData?.rarityTier === "Epic" || gemData?.rarityTier === "Legendary";
         
-        // If this hex has a gem, we show its precise status. If it's a generic hex, it acts as "explored" if the user has visited ANY gems in this zone, otherwise "active" or "locked"
-        // Wait, for empty tiles, let's just make them 'explored' if unlocked, or 'locked' if locked.
         let status: HexStatus = "locked";
         
         if (gemId) {
@@ -119,7 +118,9 @@ export function HexMap() {
     <div
       className="animate-fade-up flex flex-col gap-0 map-screen-height overflow-hidden"
       style={{
-        background: "#0F3D3D",
+        backgroundImage: `linear-gradient(to bottom, rgba(15,61,61,0.3), rgba(15,61,61,0.7)), url(${bgMap})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
       {/* Header */}
