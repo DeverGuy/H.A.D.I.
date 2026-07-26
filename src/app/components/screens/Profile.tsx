@@ -5,6 +5,7 @@ import { useGame } from "../../store/GameStore";
 import { useAuth } from "../../context/AuthContext";
 import { LEVELS as ENGINE_LEVELS, BADGE_DEFS } from "../../engine/points";
 import { SeedData } from "../dev/SeedData";
+import { TiltCard } from "../ui/TiltCard";
 
 type ProfileTab = "Achievements" | "My Gems" | "Collections" | "Activity";
 
@@ -138,65 +139,67 @@ export function Profile() {
       </div>
 
       {/* ── XP Level Progress Bar ── */}
-      <div className="rounded-[20px] p-4 mx-0" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span style={{ fontSize: 20 }}>{level.icon}</span>
-            <div>
-              <p className="font-playfair" style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>
-                {level.name}
-              </p>
-              <p className="font-dm" style={{ color: C.muted, fontSize: 11 }}>
-                Level {levelIndex + 1} of {LEVELS.length}
-              </p>
-            </div>
-          </div>
-          {next && (
-            <div className="text-right">
-              <p className="font-dm" style={{ color: C.muted, fontSize: 11, fontWeight: 500 }}>Next: {next.icon} {next.name}</p>
-              <p className="font-dm" style={{ color: "#E07B2A", fontWeight: 700, fontSize: 12 }}>
-                {ptsToNext.toLocaleString()} pts to go
-              </p>
-            </div>
-          )}
-          {!next && (
-            <span className="font-dm" style={{ background: "rgba(201,146,31,0.12)", color: "#C9921F", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99 }}>
-              Max Level 🌟
-            </span>
-          )}
-        </div>
-        {/* Level progress bar */}
-        <div style={{ height: 6, background: C.cardAlt, borderRadius: 99, overflow: "hidden" }}>
-          <div
-            style={{
-              height: "100%",
-              width: `${progress}%`,
-              background: "linear-gradient(90deg, #E07B2A, #C9921F)",
-              borderRadius: 99,
-              transition: "width 0.8s cubic-bezier(0.22,1,0.36,1)",
-            }}
-          />
-        </div>
-        <div className="flex justify-between mt-1.5">
-          <span className="font-dm" style={{ color: C.muted, fontSize: 10 }}>{level.minXP.toLocaleString()} pts</span>
-          <span className="font-dm" style={{ color: "#E07B2A", fontWeight: 600, fontSize: 10 }}>{progress}%</span>
-          {next && <span className="font-dm" style={{ color: C.muted, fontSize: 10 }}>{next.minXP.toLocaleString()} pts</span>}
-        </div>
-        {/* Level badges row */}
-        <div className="flex justify-between mt-3 pt-3" style={{ borderTop: `1px solid ${C.border}` }}>
-          {LEVELS.map((l, i) => (
-            <div key={l.name} className="flex flex-col items-center gap-0.5">
-              <div className="flex items-center justify-center rounded-full"
-                style={{ width: 28, height: 28, background: i <= levelIndex ? "linear-gradient(135deg, #E07B2A, #C9921F)" : C.cardAlt, border: i === levelIndex ? "2px solid #E07B2A" : `1px solid ${C.border}`, fontSize: 13, opacity: i > levelIndex ? 0.5 : 1 }}>
-                {l.icon}
+      <TiltCard>
+        <div className="rounded-[20px] p-4 mx-0 shadow-lg" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span style={{ fontSize: 20 }}>{level.icon}</span>
+              <div>
+                <p className="font-playfair" style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>
+                  {level.name}
+                </p>
+                <p className="font-dm" style={{ color: C.muted, fontSize: 11 }}>
+                  Level {levelIndex + 1} of {LEVELS.length}
+                </p>
               </div>
-              {i === levelIndex && (
-                <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#E07B2A" }} />
-              )}
             </div>
-          ))}
+            {next && (
+              <div className="text-right">
+                <p className="font-dm" style={{ color: C.muted, fontSize: 11, fontWeight: 500 }}>Next: {next.icon} {next.name}</p>
+                <p className="font-dm" style={{ color: "#E07B2A", fontWeight: 700, fontSize: 12 }}>
+                  {ptsToNext.toLocaleString()} pts to go
+                </p>
+              </div>
+            )}
+            {!next && (
+              <span className="font-dm" style={{ background: "rgba(201,146,31,0.12)", color: "#C9921F", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99 }}>
+                Max Level 🌟
+              </span>
+            )}
+          </div>
+          {/* Level progress bar */}
+          <div style={{ height: 6, background: C.cardAlt, borderRadius: 99, overflow: "hidden" }}>
+            <div
+              style={{
+                height: "100%",
+                width: `${progress}%`,
+                background: "linear-gradient(90deg, #E07B2A, #C9921F)",
+                borderRadius: 99,
+                transition: "width 0.8s cubic-bezier(0.22,1,0.36,1)",
+              }}
+            />
+          </div>
+          <div className="flex justify-between mt-1.5">
+            <span className="font-dm" style={{ color: C.muted, fontSize: 10 }}>{level.minXP.toLocaleString()} pts</span>
+            <span className="font-dm" style={{ color: "#E07B2A", fontWeight: 600, fontSize: 10 }}>{progress}%</span>
+            {next && <span className="font-dm" style={{ color: C.muted, fontSize: 10 }}>{next.minXP.toLocaleString()} pts</span>}
+          </div>
+          {/* Level badges row */}
+          <div className="flex justify-between mt-3 pt-3" style={{ borderTop: `1px solid ${C.border}` }}>
+            {LEVELS.map((l, i) => (
+              <div key={l.name} className="flex flex-col items-center gap-0.5">
+                <div className="flex items-center justify-center rounded-full"
+                  style={{ width: 28, height: 28, background: i <= levelIndex ? "linear-gradient(135deg, #E07B2A, #C9921F)" : C.cardAlt, border: i === levelIndex ? "2px solid #E07B2A" : `1px solid ${C.border}`, fontSize: 13, opacity: i > levelIndex ? 0.5 : 1 }}>
+                  {l.icon}
+                </div>
+                {i === levelIndex && (
+                  <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#E07B2A" }} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </TiltCard>
 
       {/* Tab Bar */}
       <div className="flex rounded-[16px] overflow-x-auto no-scrollbar" style={{ background: C.card, border: `1px solid ${C.border}` }}>

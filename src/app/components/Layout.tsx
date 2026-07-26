@@ -4,11 +4,13 @@ import { BottomNav } from "./BottomNav";
 import { RightPanel } from "./RightPanel";
 import { ToastContainer } from "./Toast";
 import { useApp, useColors } from "../context/AppContext";
+import { useGame } from "../store/GameStore";
 
 export function Layout() {
   const { darkMode } = useApp();
   const C = useColors();
   const location = useLocation();
+  const { currentWeather } = useGame();
 
   const isMapScreen = location.pathname === "/map";
   const isHexScreen = location.pathname === "/hex";
@@ -17,10 +19,25 @@ export function Layout() {
   return (
     <div
       className={`min-h-screen font-dm${darkMode ? " dark-mode" : ""}`}
-      style={{ background: C.bg, color: C.text, transition: "background 0.3s, color 0.3s" }}
+      style={{ background: C.bg, color: C.text, transition: "background 0.3s, color 0.3s", position: "relative" }}
     >
+      {/* Weather Ambience Overlay */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-[3000ms]"
+        style={{
+          opacity: 0.8,
+          background: currentWeather.condition === "Sunny" 
+            ? "radial-gradient(circle at top right, rgba(234, 179, 8, 0.15), transparent 60%)"
+            : currentWeather.condition === "Rain"
+            ? "linear-gradient(to bottom, rgba(59, 130, 246, 0.05), rgba(30, 64, 175, 0.15))"
+            : currentWeather.condition === "Cloudy"
+            ? "linear-gradient(to bottom, rgba(156, 163, 175, 0.1), rgba(75, 85, 99, 0.1))"
+            : "none"
+        }}
+      />
+      
       {/* Global Toast */}
-      <ToastContainer />
+      <div className="relative z-50"><ToastContainer /></div>
 
       {/* Left Sidebar */}
       <Sidebar />

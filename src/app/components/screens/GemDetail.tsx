@@ -133,6 +133,14 @@ export function GemDetail() {
               setMintedPoints(res.pointsAwarded ?? gem.points);
               setRealDistance(null);
               setCheckinStage("success");
+              import("canvas-confetti").then((confetti) => {
+                confetti.default({
+                  particleCount: 150,
+                  spread: 80,
+                  origin: { y: 0.6 },
+                  colors: ['#E07B2A', '#D9C1A0', '#4A6B62']
+                });
+              });
             } else {
               // If rejected due to distance, show the distance in drift_error
               const distMatch = res.reason?.match(/\((\d+)m\)/);
