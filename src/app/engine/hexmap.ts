@@ -21,50 +21,140 @@ export function isPointInPolygon(point: Coords, polygon: Coords[]): boolean {
 }
 
 // ─── Zone definitions ──────────────────────────────────────────────────────────
-// Polygons define real geographic bounding boxes across Mysuru city.
+// 14 distinct Mysuru neighbourhoods, each with its own geographic bounding box.
 // The hex grid spans: lat 12.241–12.340, lng 76.590–76.725
-// Zones are laid out as a city map — each covers a distinct real neighborhood.
+// Every hex center is checked against these polygons via getZoneForCoordinate().
 
 export const ZONE_DEFS: ZoneDef[] = [
   {
-    // North-West quadrant: Devaraja market, silk bazaar, Chamaraja ward
-    id: "artisan_quarter",
-    name: "Artisan Quarter",
-    digipinCode: "MYS-7R8P",
+    // Far North-West: Ring Road, Srirampura
+    id: "srirampura",
+    name: "Srirampura",
+    digipinCode: "MYS-SR1N",
     polygon: [
       { lat: 12.3400, lng: 76.5900 },
-      { lat: 12.3400, lng: 76.6350 },
-      { lat: 12.3050, lng: 76.6350 },
-      { lat: 12.3050, lng: 76.5900 },
+      { lat: 12.3400, lng: 76.6170 },
+      { lat: 12.3200, lng: 76.6170 },
+      { lat: 12.3200, lng: 76.5900 },
+    ],
+    totalGems: 5,
+    multiplier: 1.5,
+    unlockRequirement: { type: "none" },
+  },
+  {
+    // North-West: Gokulam, yoga studios, bungalows
+    id: "gokulam",
+    name: "Gokulam",
+    digipinCode: "MYS-GK2W",
+    polygon: [
+      { lat: 12.3400, lng: 76.6170 },
+      { lat: 12.3400, lng: 76.6440 },
+      { lat: 12.3200, lng: 76.6440 },
+      { lat: 12.3200, lng: 76.6170 },
+    ],
+    totalGems: 6,
+    multiplier: 1.5,
+    unlockRequirement: { type: "none" },
+  },
+  {
+    // North-Centre: Gandhi Square, clock tower, colonial core
+    id: "gandhi_square",
+    name: "Gandhi Square",
+    digipinCode: "MYS-GS3C",
+    polygon: [
+      { lat: 12.3400, lng: 76.6440 },
+      { lat: 12.3400, lng: 76.6680 },
+      { lat: 12.3200, lng: 76.6680 },
+      { lat: 12.3200, lng: 76.6440 },
+    ],
+    totalGems: 8,
+    multiplier: 2.0,
+    unlockRequirement: { type: "level", level: 1 },
+  },
+  {
+    // Far North-East: Vijayanagar, Hebbal, highway edge
+    id: "vijayanagar",
+    name: "Vijayanagar",
+    digipinCode: "MYS-VN4E",
+    polygon: [
+      { lat: 12.3400, lng: 76.6680 },
+      { lat: 12.3400, lng: 76.7250 },
+      { lat: 12.3200, lng: 76.7250 },
+      { lat: 12.3200, lng: 76.6680 },
+    ],
+    totalGems: 5,
+    multiplier: 1.5,
+    unlockRequirement: { type: "none" },
+  },
+  {
+    // Upper-West: Devaraja Market, silk weaving, agarbatti
+    id: "devaraja_market",
+    name: "Devaraja Market",
+    digipinCode: "MYS-DM5W",
+    polygon: [
+      { lat: 12.3200, lng: 76.5900 },
+      { lat: 12.3200, lng: 76.6170 },
+      { lat: 12.2950, lng: 76.6170 },
+      { lat: 12.2950, lng: 76.5900 },
     ],
     totalGems: 9,
     multiplier: 2.0,
     unlockRequirement: { type: "none" },
   },
   {
-    // North-East quadrant: St. Philomena's Church, Nazarbad, Vijayanagar
-    id: "street_food_belt",
-    name: "Street Food Belt",
-    digipinCode: "MYS-1F5Q",
+    // Upper-Centre-West: Mandi Mohalla, old city, temples
+    id: "mandi_mohalla",
+    name: "Mandi Mohalla",
+    digipinCode: "MYS-MM6C",
     polygon: [
-      { lat: 12.3400, lng: 76.6350 },
-      { lat: 12.3400, lng: 76.7250 },
-      { lat: 12.3050, lng: 76.7250 },
-      { lat: 12.3050, lng: 76.6350 },
+      { lat: 12.3200, lng: 76.6170 },
+      { lat: 12.3200, lng: 76.6440 },
+      { lat: 12.2950, lng: 76.6440 },
+      { lat: 12.2950, lng: 76.6170 },
     ],
-    totalGems: 8,
-    multiplier: 1.5,
+    totalGems: 7,
+    multiplier: 2.0,
+    unlockRequirement: { type: "none" },
+  },
+  {
+    // Upper-Centre: Mysore Palace, Zoo, Jaganmohan Palace
+    id: "heritage_core",
+    name: "Heritage Core",
+    digipinCode: "MYS-4N2K",
+    polygon: [
+      { lat: 12.3200, lng: 76.6440 },
+      { lat: 12.3200, lng: 76.6680 },
+      { lat: 12.2950, lng: 76.6680 },
+      { lat: 12.2950, lng: 76.6440 },
+    ],
+    totalGems: 12,
+    multiplier: 3.0,
+    unlockRequirement: { type: "none" },
+  },
+  {
+    // Upper-East: Nazarbad, St. Philomena's Church, Windflower
+    id: "nazarbad",
+    name: "Nazarbad",
+    digipinCode: "MYS-NZ7E",
+    polygon: [
+      { lat: 12.3200, lng: 76.6680 },
+      { lat: 12.3200, lng: 76.7250 },
+      { lat: 12.2950, lng: 76.7250 },
+      { lat: 12.2950, lng: 76.6680 },
+    ],
+    totalGems: 6,
+    multiplier: 2.0,
     unlockRequirement: { type: "level", level: 1 },
   },
   {
-    // Middle-West: Kuvempunagar, University of Mysore, Kukkarahalli Lake
+    // Mid-West: Kuvempunagar, University of Mysore, Kukkarahalli Lake
     id: "kuvempunagar",
     name: "Kuvempunagar",
     digipinCode: "MYS-8K9V",
     polygon: [
-      { lat: 12.3050, lng: 76.5900 },
-      { lat: 12.3050, lng: 76.6350 },
-      { lat: 12.2700, lng: 76.6350 },
+      { lat: 12.2950, lng: 76.5900 },
+      { lat: 12.2950, lng: 76.6250 },
+      { lat: 12.2700, lng: 76.6250 },
       { lat: 12.2700, lng: 76.5900 },
     ],
     totalGems: 10,
@@ -72,49 +162,79 @@ export const ZONE_DEFS: ZoneDef[] = [
     unlockRequirement: { type: "none" },
   },
   {
-    // Middle-Centre: Mysore Palace, Zoo, Jaganmohan Palace, Fort
-    id: "heritage_core",
-    name: "Heritage Core",
-    digipinCode: "MYS-4N2K",
+    // Mid-Centre-West: Saraswathipuram, Lakshmipuram, Rail Museum
+    id: "saraswathipuram",
+    name: "Saraswathipuram",
+    digipinCode: "MYS-SP8W",
     polygon: [
-      { lat: 12.3050, lng: 76.6350 },
-      { lat: 12.3050, lng: 76.6700 },
-      { lat: 12.2700, lng: 76.6700 },
-      { lat: 12.2700, lng: 76.6350 },
+      { lat: 12.2950, lng: 76.6250 },
+      { lat: 12.2950, lng: 76.6500 },
+      { lat: 12.2700, lng: 76.6500 },
+      { lat: 12.2700, lng: 76.6250 },
     ],
-    totalGems: 12,
-    multiplier: 3.0,
-    unlockRequirement: { type: "none" },
+    totalGems: 7,
+    multiplier: 2.0,
+    unlockRequirement: { type: "gems_in_zone", zoneId: "heritage_core", gemCount: 2 },
   },
   {
-    // Middle-East: Chamundi Hill foothills, Lalitha Mahal, Yadavagiri
+    // Mid-Centre-East: Fort, Lashkar Mohalla, Venkataramana Temple
     id: "fort_zone",
     name: "Fort Zone",
     digipinCode: "MYS-9T4L",
     polygon: [
-      { lat: 12.3050, lng: 76.6700 },
-      { lat: 12.3050, lng: 76.7250 },
-      { lat: 12.2700, lng: 76.7250 },
+      { lat: 12.2950, lng: 76.6500 },
+      { lat: 12.2950, lng: 76.6700 },
       { lat: 12.2700, lng: 76.6700 },
+      { lat: 12.2700, lng: 76.6500 },
     ],
     totalGems: 7,
-    multiplier: 2.0,
+    multiplier: 2.5,
     unlockRequirement: { type: "gems_in_zone", zoneId: "heritage_core", gemCount: 3 },
   },
   {
-    // South: Chamundi Hill, Brindavan Gardens area, Bogadi, south outskirts
-    id: "silk_district",
-    name: "Silk District",
-    digipinCode: "MYS-3K6W",
+    // Mid-East: Yadavagiri, Lalitha Mahal, east residential
+    id: "yadavagiri",
+    name: "Yadavagiri",
+    digipinCode: "MYS-YD9E",
     polygon: [
-      { lat: 12.2700, lng: 76.5900 },
+      { lat: 12.2950, lng: 76.6700 },
+      { lat: 12.2950, lng: 76.7250 },
       { lat: 12.2700, lng: 76.7250 },
-      { lat: 12.2400, lng: 76.7250 },
-      { lat: 12.2400, lng: 76.5900 },
+      { lat: 12.2700, lng: 76.6700 },
     ],
     totalGems: 6,
-    multiplier: 2.5,
+    multiplier: 2.0,
     unlockRequirement: { type: "level", level: 2 },
+  },
+  {
+    // South-West: Bogadi, Ring Road, newer development
+    id: "bogadi",
+    name: "Bogadi",
+    digipinCode: "MYS-BG0S",
+    polygon: [
+      { lat: 12.2700, lng: 76.5900 },
+      { lat: 12.2700, lng: 76.6400 },
+      { lat: 12.2400, lng: 76.6400 },
+      { lat: 12.2400, lng: 76.5900 },
+    ],
+    totalGems: 5,
+    multiplier: 1.5,
+    unlockRequirement: { type: "level", level: 2 },
+  },
+  {
+    // South-East: Chamundi Hill, sacred hilltop, silk district
+    id: "silk_district",
+    name: "Chamundi Hills",
+    digipinCode: "MYS-3K6W",
+    polygon: [
+      { lat: 12.2700, lng: 76.6400 },
+      { lat: 12.2700, lng: 76.7250 },
+      { lat: 12.2400, lng: 76.7250 },
+      { lat: 12.2400, lng: 76.6400 },
+    ],
+    totalGems: 8,
+    multiplier: 3.0,
+    unlockRequirement: { type: "level", level: 3 },
   },
 ];
 

@@ -19,59 +19,131 @@ interface HexZone {
 }
 
 const ZONE_DATA: Record<string, { emoji: string; tagline: string; facts: string[]; nearbyPlaceIds: number[] }> = {
+  srirampura: {
+    emoji: "🛣️", tagline: "Where the city meets the highway",
+    facts: [
+      "Srirampura is Mysuru's gateway — the Bangalore–Mysore highway ends here, and thousands of commuters pass through daily.",
+      "The area is known for its large medical hub — several major hospitals and clinics cluster along its main roads.",
+      "Neighbourhood residents host one of Mysuru's quietest and most authentic Ganesha Chaturthi celebrations each year.",
+    ],
+    nearbyPlaceIds: [4, 18],
+  },
+  gokulam: {
+    emoji: "🧘", tagline: "The yoga capital within the city",
+    facts: [
+      "Gokulam is internationally famous for Ashtanga yoga — hundreds of Western students come here every year to train under masters.",
+      "The neighbourhood has a charming European café culture — many yoga retreats set up juice bars and health cafés along its lanes.",
+      "Gokulam was developed in the 1980s and is one of Mysuru's cleanest, most tree-lined residential areas.",
+    ],
+    nearbyPlaceIds: [16, 18],
+  },
+  gandhi_square: {
+    emoji: "🕰️", tagline: "The bustling colonial heart of the city",
+    facts: [
+      "Gandhi Square's iconic clock tower was built during the British era and remains the most recognisable landmark of central Mysuru.",
+      "The square is ringed by Mysuru's most legendary filter coffee shops — Nandy's Filter Coffee has been here since 1962.",
+      "At 6 PM every day, traffic stops spontaneously as cycle-rickshaw wallahs, pedestrians and vendors swarm the square.",
+    ],
+    nearbyPlaceIds: [12, 13, 14],
+  },
+  vijayanagar: {
+    emoji: "🏘️", tagline: "Mysuru's modern residential heartland",
+    facts: [
+      "Vijayanagar is one of Mysuru's fastest-growing areas — a planned township developed in the 1990s with wide roads and parks.",
+      "The Hebbal area within this zone is close to the new Mysuru–Bengaluru expressway, making it a booming real estate hub.",
+      "Vijayanagar hosts some of Mysuru's best biriyani restaurants — the Old Mysore style dum biriyani here is unmatched.",
+    ],
+    nearbyPlaceIds: [9, 16],
+  },
+  devaraja_market: {
+    emoji: "🌸", tagline: "A century-old sensory overload of colour and fragrance",
+    facts: [
+      "Devaraja Market was built in 1900 and supplies flowers to the Mysore Palace daily — tonnes of jasmine, rose and marigold arrive before dawn.",
+      "The market has a dedicated section of banana-leaf-wrapped bundles of incense — Mysuru is India's agarbatti capital.",
+      "Sandalwood soap bars made with real Mysuru sandal oil are sold here at a fraction of the retail price.",
+    ],
+    nearbyPlaceIds: [1, 2, 13],
+  },
+  mandi_mohalla: {
+    emoji: "🕌", tagline: "The old city's cultural crossroads",
+    facts: [
+      "Mandi Mohalla is Mysuru's most diverse neighbourhood — Hindu temples, mosques and churches all stand within a few streets of each other.",
+      "The Jama Masjid here is one of the most beautiful mosques in Karnataka, with intricate white-and-gold architecture.",
+      "This zone once served as the grain market for all of Mysuru — 'Mandi' literally means 'grain market' in Urdu.",
+    ],
+    nearbyPlaceIds: [8, 10, 13],
+  },
   heritage_core: {
     emoji: "🏰", tagline: "The royal heart of Mysuru",
     facts: [
-      "Mysore Palace is lit up by 97,000 bulbs every Sunday evening — a spectacle visible from Chamundi Hill.",
+      "Mysore Palace is lit up by 97,000 bulbs every Sunday evening — a spectacle visible from Chamundi Hill 3km away.",
       "The current Palace took 5 years to build (1897–1912) after the previous one burned down during a royal wedding.",
       "The Dasara procession from this zone is a 400-year-old tradition attracting over a million visitors each year.",
     ],
     nearbyPlaceIds: [1, 2, 3, 8],
   },
+  nazarbad: {
+    emoji: "⛪", tagline: "Colonial bungalows and soaring Gothic spires",
+    facts: [
+      "St. Philomena's Church in Nazarbad is one of the largest churches in Asia — built in 1936 in the Gothic Revival style.",
+      "The Windflower Spa & Resort in this zone is set inside a restored colonial bungalow with original teak floors.",
+      "Nazarbad translates roughly to 'place watched by the gaze' — it was once a residential cantonment for British officers.",
+    ],
+    nearbyPlaceIds: [9, 10, 16, 17],
+  },
   kuvempunagar: {
-    emoji: "🌿", tagline: "A green, residential gem of the city",
+    emoji: "🌿", tagline: "A green, lakeside residential gem",
     facts: [
-      "Named after Kuvempu, Karnataka's greatest modern poet and the first Jnanpith Award winner from the state.",
-      "Kukkarahalli Lake here hosts 200+ species of birds including painted storks, kingfishers and cormorants.",
-      "The University of Mysore (est. 1916) is one of India's oldest universities and is located in this zone.",
+      "Named after poet-laureate Kuvempu — Karnataka's greatest 20th-century poet and the first Jnanpith Award winner from the state.",
+      "Kukkarahalli Lake here hosts 200+ species of birds including painted storks, kingfishers and rare black-headed ibises.",
+      "The University of Mysore (est. 1916) is one of India's oldest universities — its Crawford Hall building is a heritage landmark.",
     ],
-    nearbyPlaceIds: [18, 4, 19],
+    nearbyPlaceIds: [18, 19, 4],
   },
-  artisan_quarter: {
-    emoji: "🧵", tagline: "Where silk meets tradition",
+  saraswathipuram: {
+    emoji: "🚂", tagline: "Old Mysuru charm with a dash of steam",
     facts: [
-      "Mysore silk is woven with real gold zari thread — a 400-year-old craft patronized by the Wadiyar dynasty.",
-      "Mysuru produces over 80% of India's agarbatti (incense sticks) — largely from cottage industries in this zone.",
-      "The famous Cauvery Arts Emporium here sells rosewood-inlaid sandalwood carvings unique to Mysuru.",
+      "The National Rail Museum branch here displays original royal saloon carriages used by the Mysore Maharajas — including a golden carriage.",
+      "Saraswathipuram's filter coffee shops are legendary among locals — early morning queues form before 7 AM.",
+      "This neighbourhood is home to several traditional sweet shops making original Mysuru Pak — a dense, ghee-rich fudge invented in Mysuru.",
     ],
-    nearbyPlaceIds: [2, 8, 13],
-  },
-  street_food_belt: {
-    emoji: "🍛", tagline: "A foodie's paradise — eat like a local",
-    facts: [
-      "The Mysore Masala Dosa was invented in the streets of this zone — the secret red chutney recipe is still guarded!",
-      "Iyer's Idli at Agrahara Lane sells only 50 plates a day and they are all sold out before 7 AM every morning.",
-      "Filter coffee in Mysuru is made with a strict 60:40 coffee-to-chicory ratio — a tradition from the British era.",
-    ],
-    nearbyPlaceIds: [11, 12, 13, 14],
+    nearbyPlaceIds: [4, 11, 12],
   },
   fort_zone: {
-    emoji: "⚔️", tagline: "Ancient walls with hidden stories",
+    emoji: "⚔️", tagline: "Ancient walls and hidden histories",
     facts: [
-      "Mysore Fort was originally built of mud by the Wadiyar kings in 1524 and later reinforced with stone.",
-      "Tipu Sultan used this fort as his summer capital before eventually shifting his throne to Srirangapatna.",
-      "Locals believe hidden underground tunnels connect the Fort to the Palace — none have been found so far!",
+      "Mysore Fort was originally built of mud by the Wadiyar kings in 1524 and only later reinforced with stone.",
+      "Tipu Sultan used this fort complex as his summer capital before eventually shifting his throne to Srirangapatna.",
+      "Locals believe hidden underground tunnels connect the Fort to the Palace 1 km away — archaeologists haven't confirmed it yet!",
     ],
-    nearbyPlaceIds: [8, 4, 6],
+    nearbyPlaceIds: [8, 1, 7],
+  },
+  yadavagiri: {
+    emoji: "🌅", tagline: "Hilltop views and heritage hotels",
+    facts: [
+      "Yadavagiri sits at a slight elevation and offers some of the best views of the city skyline and Chamundi Hill.",
+      "The Lalitha Mahal Palace Hotel (1921) was built solely to accommodate the Viceroy of India — today it's a 5-star heritage hotel.",
+      "The area is dotted with sprawling old Mysuru bungalows, many from the Dewan era, with private gardens and ancient jackfruit trees.",
+    ],
+    nearbyPlaceIds: [15, 6, 19],
+  },
+  bogadi: {
+    emoji: "🌆", tagline: "Mysuru's rising new quarter",
+    facts: [
+      "Bogadi is one of Mysuru's fastest-developing zones — the Outer Ring Road passes through it, driving rapid residential growth.",
+      "The area has become a hub for IT professionals who work remotely — coworking spaces and modern cafés opened here post-2020.",
+      "Bogadi Lake is a hidden birding spot — early morning walks reveal kingfishers, herons and migratory waterfowl.",
+    ],
+    nearbyPlaceIds: [5, 18, 20],
   },
   silk_district: {
-    emoji: "✨", tagline: "The southern luxury quarter",
+    emoji: "⛰️", tagline: "Sacred peaks and silk-weaving valleys",
     facts: [
-      "Mysore Silk has a GI (Geographical Indication) tag — only silk woven in Mysuru can legally be called Mysore Silk.",
-      "The Lalitha Mahal Palace Hotel (1921) was originally built solely to host the Viceroy of India.",
-      "Chamundi Hill rises to 1,065 metres and can be seen from almost anywhere in the city on a clear day.",
+      "Chamundi Hill rises to 1,065 metres — the 1,000 steps carved into the hillside by Dodda Devaraja Wadiyar in the 17th century.",
+      "A massive Nandi (sacred bull) statue carved from a single granite boulder stands midway up the hill — it's 4.8m tall.",
+      "Mysore Silk has a GI tag — only silk produced in this region, with real gold zari, can legally carry the 'Mysore Silk' name.",
     ],
-    nearbyPlaceIds: [15, 6, 19, 5],
+    nearbyPlaceIds: [6, 15, 19, 5],
   },
 };
 
