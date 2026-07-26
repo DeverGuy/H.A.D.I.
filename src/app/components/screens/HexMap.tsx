@@ -1,9 +1,10 @@
+import "leaflet/dist/leaflet.css";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
+import { MapContainer, TileLayer, Polygon } from "react-leaflet";
 import { useApp, useColors } from "../../context/AppContext";
 import { useGame } from "../../store/GameStore";
-import { ZONE_DEFS, getHexDisplayStatus } from "../../engine/hexmap";
-import bgMap from "../../assets/mysore-satellite-bg.png";
+import { ZONE_DEFS, getHexDisplayStatus, generateGeoHexGrid } from "../../engine/hexmap";
 
 type HexStatus = "explored" | "active" | "gem" | "locked";
 
@@ -19,13 +20,23 @@ interface HexZone {
   density: "High" | "Medium" | "Low";
   gemsCount: number;
   safetyScore: number;
+  polygon: [number, number][]; // Leaflet LatLngTuple
+  centerLat: number;
+  centerLng: number;
 }
 
 const hexStatusColors: Record<HexStatus, string> = {
-  explored: "rgba(26, 82, 82, 0.7)", // More translucent
-  active: "rgba(224, 123, 42, 0.7)", 
-  gem: "rgba(201, 146, 31, 0.9)",
-  locked: "rgba(255, 255, 255, 0.05)", // Barely visible over map
+  explored: "rgba(26, 82, 82, 0.6)",
+  active: "rgba(224, 123, 42, 0.6)", 
+  gem: "rgba(201, 146, 31, 0.8)",
+  locked: "rgba(255, 255, 255, 0.05)",
+};
+
+const hexStatusStrokes: Record<HexStatus, string> = {
+  explored: "#1A5252",
+  active: "#E07B2A", 
+  gem: "#FFD700",
+  locked: "rgba(255, 255, 255, 0.2)",
 };
 
 const densityConfig = {
@@ -51,80 +62,66 @@ export function HexMap() {
 
   // Generate real-time grid based on game state
   const grid = useMemo(() => {
-    const rows = 8;
-    const cols = 9;
-    const g: HexZone[][] = [];
+    // Generate geographic hexes over Mysuru
+    // Center of Mysuru ~ 12.3051, 76.6450
+    // A radius of 0.005 degrees is approx 500 meters width per hex
+    const geoHexes = generateGeoHexGrid(12.3400, 76.5900, 0.006, 12, 14);
     
-    // Hardcode some visually pleasing gem coordinates (10 gems total)
+    // Distribute actual gems to some random hexes for visual effect (just mapping 10 gems)
     const gemCoords: Record<string, number> = {
-      "1,2": 1, "2,5": 2, "4,3": 3, "6,1": 4, "5,7": 5,
-      "7,4": 6, "2,8": 7, "0,6": 8, "3,0": 9, "6,8": 10
+      "3,5": 1, "4,8": 2, "6,6": 3, "8,3": 4, "7,9": 5,
+      "9,7": 6, "3,11": 7, "1,8": 8, "5,2": 9, "9,10": 10
     };
 
-    for (let r = 0; r < rows; r++) {
-      g[r] = [];
-      for (let c = 0; c < cols; c++) {
-        // Distribute the 5 zones in patches based on row/col
-        const zoneIdx = Math.floor((r / rows) * 2.5 + (c / cols) * 2.5) % ZONE_DEFS.length;
-        const zone = ZONE_DEFS[zoneIdx];
-        
-        const gemId = gemCoords[`${r},${c}`] || null;
-        const gemData = gemId ? allGems.find(x => x.id === gemId) : null;
-        
-        const isUnlocked = isZoneUnlockedFn(zone.id);
-        const isVisited = gemId ? visitedGemIds.has(gemId) : false;
-        const isLegendary = gemData?.rarityTier === "Epic" || gemData?.rarityTier === "Legendary";
-        
-        let status: HexStatus = "locked";
-        
-        if (gemId) {
-          status = getHexDisplayStatus(isUnlocked, isVisited, isLegendary);
-        } else {
-          status = isUnlocked ? "active" : "locked";
-          // Add some visual noise: 30% of unlocked empty tiles look "explored"
-          if (isUnlocked && ((r * 7 + c * 3) % 10) > 6) {
-             status = "explored";
-          }
+    return geoHexes.map((geoHex) => {
+      const r = geoHex.row;
+      const c = geoHex.col;
+      // Procedurally assign zones so they clump geographically
+      const zoneIdx = Math.floor((r / 12) * 2.5 + (c / 14) * 2.5) % ZONE_DEFS.length;
+      const zone = ZONE_DEFS[zoneIdx];
+      
+      const gemId = gemCoords[`${r},${c}`] || null;
+      const gemData = gemId ? allGems.find(x => x.id === gemId) : null;
+      
+      const isUnlocked = isZoneUnlockedFn(zone.id);
+      const isVisited = gemId ? visitedGemIds.has(gemId) : false;
+      const isLegendary = gemData?.rarityTier === "Epic" || gemData?.rarityTier === "Legendary";
+      
+      let status: HexStatus = "locked";
+      
+      if (gemId) {
+        status = getHexDisplayStatus(isUnlocked, isVisited, isLegendary);
+      } else {
+        status = isUnlocked ? "active" : "locked";
+        // Visual noise
+        if (isUnlocked && ((r * 7 + c * 3) % 10) > 6) {
+           status = "explored";
         }
-
-        g[r][c] = {
-          row: r,
-          col: c,
-          status,
-          zoneId: zone.id,
-          zoneName: zone.name,
-          digipinCode: zone.digipinCode || `MYS-${r}${c}X`,
-          multiplier: `${zone.multiplier.toFixed(1)}×` as any,
-          gemId,
-          density: "Medium",
-          gemsCount: gemId ? 1 : 0,
-          safetyScore: 4,
-        };
       }
-    }
-    return g;
+
+      return {
+        row: r,
+        col: c,
+        status,
+        zoneId: zone.id,
+        zoneName: zone.name,
+        digipinCode: zone.digipinCode || `MYS-${r}${c}X`,
+        multiplier: `${zone.multiplier.toFixed(1)}×` as any,
+        gemId,
+        density: "Medium",
+        gemsCount: gemId ? 1 : 0,
+        safetyScore: 4,
+        polygon: geoHex.polygon,
+        centerLat: geoHex.centerLat,
+        centerLng: geoHex.centerLng,
+      } as HexZone;
+    });
   }, [allGems, visitedGemIds, isZoneUnlockedFn]);
 
-  const hexW = 52;
-  const hexH = 60;
-  const colGap = 4;
-  const rowGap = -14;
-  const rows = grid.length;
-  const cols = grid[0].length;
-  const totalWidth = cols * (hexW + colGap) + hexW / 2 + 8;
-  const totalHeight = rows * (hexH + rowGap) + 14;
-
   return (
-    <div
-      className="animate-fade-up flex flex-col gap-0 map-screen-height overflow-hidden"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(15,61,61,0.3), rgba(15,61,61,0.7)), url(${bgMap})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* Header */}
-      <div className="px-6 pt-8 pb-4 flex items-start justify-between">
+    <div className="animate-fade-up relative flex flex-col gap-0 map-screen-height overflow-hidden bg-[#0F3D3D]">
+      {/* Header overlaying map */}
+      <div className="absolute top-0 left-0 right-0 z-[400] px-6 pt-8 pb-4 flex items-start justify-between pointer-events-none">
         <div>
           <h1
             className="font-playfair mb-1 drop-shadow-md"
@@ -132,15 +129,15 @@ export function HexMap() {
           >
             Hex Map
           </h1>
-          <p className="font-dm" style={{ color: "rgba(255,255,255,0.85)", fontSize: 16, fontWeight: 600 }}>
+          <p className="font-dm drop-shadow-md" style={{ color: "rgba(255,255,255,0.95)", fontSize: 16, fontWeight: 600 }}>
             Explore Mysuru by zone
           </p>
         </div>
 
         {/* Legend card */}
         <div
-          className="rounded-[14px] p-3"
-          style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
+          className="rounded-[14px] p-3 pointer-events-auto"
+          style={{ background: "rgba(15,61,61,0.85)", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.1)" }}
         >
           {(["explored", "active", "gem", "locked"] as HexStatus[]).map((s) => (
             <div key={s} className="flex items-center gap-2 mb-1 last:mb-0">
@@ -151,7 +148,7 @@ export function HexMap() {
                   borderRadius: 3,
                   background: hexStatusColors[s],
                   flexShrink: 0,
-                  border: s === "locked" ? "1px solid rgba(255,255,255,0.2)" : "none",
+                  border: `1px solid ${hexStatusStrokes[s]}`,
                 }}
               />
               <span className="font-dm" style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>
@@ -162,70 +159,41 @@ export function HexMap() {
         </div>
       </div>
 
-      {/* Hex Grid */}
-      <div className="flex-1 overflow-auto px-4 pb-6 flex items-center justify-center">
-        <div
-          style={{
-            position: "relative",
-            width: totalWidth,
-            height: totalHeight,
-          }}
-        >
-          {grid.map((row, rIdx) =>
-            row.map((zone, cIdx) => {
-              const isOddRow = rIdx % 2 === 1;
-              const x = cIdx * (hexW + colGap) + (isOddRow ? (hexW + colGap) / 2 : 0);
-              const y = rIdx * (hexH + rowGap);
-              const isSelected = selectedZone?.row === rIdx && selectedZone?.col === cIdx;
+      {/* Leaflet Hex Grid — fills all remaining height */}
+      <div className="flex-1 w-full relative" style={{ minHeight: 0 }}>
+        {/* Subtle dark overlay to match app theme (placed over the map, under the UI) */}
+        <div className="absolute inset-0 pointer-events-none z-[400]" style={{ background: "rgba(15,61,61,0.3)" }} />
 
-              return (
-                <div
-                  key={`${rIdx}-${cIdx}`}
-                  style={{ position: "absolute", left: x, top: y, cursor: "pointer" }}
-                  onClick={() => setSelectedZone(isSelected ? null : zone)}
-                >
-                  {/* Selection ring */}
-                  {isSelected && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: -4,
-                        top: -4,
-                        width: hexW + 8,
-                        height: hexH + 8,
-                        clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-                        background: "#fff",
-                        zIndex: 0,
-                      }}
-                    />
-                  )}
-                  <div
-                    style={{
-                      position: "relative",
-                      zIndex: 1,
-                      width: hexW,
-                      height: hexH,
-                      clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-                      background: hexStatusColors[zone.status],
-                      transition: "background 0.22s, filter 0.22s",
-                      filter: isSelected ? "brightness(1.15)" : "brightness(1)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {zone.status === "gem" && (
-                      <span style={{ fontSize: 16, userSelect: "none" }}>💎</span>
-                    )}
-                    {zone.status === "locked" && (
-                      <span style={{ fontSize: 14, userSelect: "none", opacity: 0.5 }}>🔒</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+        <MapContainer
+          center={[12.3051, 76.6450]} // Mysuru Palace
+          zoom={13}
+          zoomControl={false}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution="Tiles &copy; Esri"
+          />
+          
+          {grid.map((zone) => (
+            <Polygon
+              key={`${zone.row}-${zone.col}`}
+              positions={zone.polygon}
+              pathOptions={{
+                color: hexStatusStrokes[zone.status],
+                fillColor: hexStatusColors[zone.status],
+                fillOpacity: 1,
+                weight: selectedZone?.row === zone.row && selectedZone?.col === zone.col ? 3 : 1,
+                opacity: 0.95,
+              }}
+              eventHandlers={{
+                click: () => {
+                  setSelectedZone(zone);
+                },
+              }}
+            />
+          ))}
+        </MapContainer>
       </div>
 
       {/* Zone Detail Modal */}

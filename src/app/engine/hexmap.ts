@@ -39,6 +39,20 @@ export const ZONE_DEFS: ZoneDef[] = [
     unlockRequirement: { type: "none" },
   },
   {
+    id: "kuvempunagar",
+    name: "Kuvempunagar",
+    digipinCode: "MYS-8K9V",
+    polygon: [
+      { lat: 12.2900, lng: 76.6150 },
+      { lat: 12.2900, lng: 76.6350 },
+      { lat: 12.2700, lng: 76.6350 },
+      { lat: 12.2700, lng: 76.6150 }
+    ],
+    totalGems: 10,
+    multiplier: 2.5,
+    unlockRequirement: { type: "none" },
+  },
+  {
     id: "artisan_quarter",
     name: "Artisan Quarter",
     digipinCode: "MYS-7R8P",
@@ -77,6 +91,63 @@ export const ZONE_DEFS: ZoneDef[] = [
     unlockRequirement: { type: "level", level: 2 },
   },
 ];
+
+// ─── Geographic Hex Grid Math ──────────────────────────────────────────────────
+
+export interface GeoHex {
+  row: number;
+  col: number;
+  centerLat: number;
+  centerLng: number;
+  polygon: [number, number][]; // [lat, lng] array for Leaflet
+}
+
+/**
+ * Generates a grid of Pointy-Topped hexagons geographically.
+ */
+export function generateGeoHexGrid(
+  startLat: number, 
+  startLng: number, 
+  radiusDeg: number, 
+  rows: number, 
+  cols: number
+): GeoHex[] {
+  const hexes: GeoHex[] = [];
+  
+  const w = Math.sqrt(3) * radiusDeg;
+  const h = 2 * radiusDeg;
+  
+  // Horizontal spacing between column centers
+  const horizSpacing = w;
+  // Vertical spacing between row centers
+  const vertSpacing = (3/4) * h;
+
+  for (let r = 0; r < rows; r++) {
+    // Offset odd rows to the right by half the width
+    const offset = (r % 2 !== 0) ? (w / 2) : 0;
+    
+    for (let c = 0; c < cols; c++) {
+      // In a standard grid, lat goes down (South) as row increases, and lng goes right (East) as col increases
+      const centerLat = startLat - (r * vertSpacing); 
+      const centerLng = startLng + (c * horizSpacing) + offset;
+      
+      // Calculate the 6 vertices for a pointy-topped hex
+      const polygon: [number, number][] = [];
+      for (let i = 0; i < 6; i++) {
+        // -30 degrees (or -PI/6) offsets the vertices to make it pointy-topped
+        const angle_deg = 60 * i - 30;
+        const angle_rad = Math.PI / 180 * angle_deg;
+        const vertexLng = centerLng + radiusDeg * Math.cos(angle_rad);
+        const vertexLat = centerLat + radiusDeg * Math.sin(angle_rad);
+        polygon.push([vertexLat, vertexLng]);
+      }
+      
+      hexes.push({ row: r, col: c, centerLat, centerLng, polygon });
+    }
+  }
+  
+  return hexes;
+}
 
 // ─── Digipin → multiplier lookup ──────────────────────────────────────────────
 
