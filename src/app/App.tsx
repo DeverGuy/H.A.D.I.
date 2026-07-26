@@ -6,7 +6,7 @@ import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AppProvider, useApp } from "./context/AppContext";
-import { GameProvider } from "./store/GameStore";
+import { GameProvider, useGame } from "./store/GameStore";
 import { startGeofence, stopGeofence } from "./engine/geofence";
 
 // ── Onboarding gate key ───────────────────────────────────────────────────────
