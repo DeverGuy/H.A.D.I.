@@ -183,8 +183,8 @@ export function HexMap() {
       {/* Bottom Sheet */}
       {selectedZone && zoneInfo && (
         <>
-          <div className="fixed inset-0 z-[600]" style={{ background: "rgba(0,0,0,0.45)" }} onClick={() => { setSelectedZone(null); polygonLayersRef.current.forEach(p => { const z = selectedZoneRef.current; if (z) p.setStyle({ weight: 1.5, color: hexStatusStrokes[z.status] }); }); }} />
-          <div className="fixed bottom-0 left-0 right-0 z-[700] rounded-t-[28px]" style={{ background: darkMode ? "#0F2020" : "#FFFDF8", maxHeight: "80vh", boxShadow: "0 -10px 60px rgba(0,0,0,0.5)", animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}>
+          <div className="absolute inset-0 z-[600]" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => { setSelectedZone(null); polygonLayersRef.current.forEach(p => { const z = selectedZoneRef.current; if (z) p.setStyle({ weight: 1.5, color: hexStatusStrokes[z.status] }); }); }} />
+          <div className="absolute bottom-0 left-0 right-0 z-[700] rounded-t-[28px]" style={{ background: "#0D2828", maxHeight: "75vh", boxShadow: "0 -10px 60px rgba(0,0,0,0.7)", border: "1px solid rgba(255,255,255,0.1)", animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}>
             <div className="flex justify-center pt-3 pb-1">
               <div style={{ width:36, height:4, borderRadius:99, background:"rgba(255,255,255,0.15)" }} />
             </div>
