@@ -1,7 +1,7 @@
 import "leaflet/dist/leaflet.css";
-import { useState, useMemo } from "react";
+import L from "leaflet";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import { MapContainer, TileLayer, Polygon } from "react-leaflet";
 import { useApp, useColors } from "../../context/AppContext";
 import { useGame } from "../../store/GameStore";
 import { ZONE_DEFS, getHexDisplayStatus, generateGeoHexGrid } from "../../engine/hexmap";
@@ -57,8 +57,11 @@ export function HexMap() {
   const C = useColors();
   const navigate = useNavigate();
   const [selectedZone, setSelectedZone] = useState<HexZone | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<L.Map | null>(null);
+  const polygonLayersRef = useRef<L.Polygon[]>([]);
   
-  const { allGems, visitedGemIds, isZoneUnlockedFn, stats } = useGame();
+  const { allGems, visitedGemIds, isZoneUnlockedFn } = useGame();
 
   // Generate real-time grid based on game state
   const grid = useMemo(() => {
@@ -118,6 +121,60 @@ export function HexMap() {
     });
   }, [allGems, visitedGemIds, isZoneUnlockedFn]);
 
+  // Build the imperative Leaflet map
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    // Initialize map only once
+    if (!leafletMapRef.current) {
+      leafletMapRef.current = L.map(mapContainerRef.current, {
+        center: [12.3051, 76.6450],
+        zoom: 13,
+        zoomControl: false,
+      });
+
+      // Esri satellite tiles
+      L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "Tiles &copy; Esri" }
+      ).addTo(leafletMapRef.current);
+    }
+
+    const map = leafletMapRef.current;
+
+    // Remove old polygons
+    polygonLayersRef.current.forEach(p => p.remove());
+    polygonLayersRef.current = [];
+
+    // Draw hex polygons
+    grid.forEach((zone) => {
+      const poly = L.polygon(zone.polygon, {
+        color: hexStatusStrokes[zone.status],
+        fillColor: hexStatusColors[zone.status],
+        fillOpacity: 1,
+        weight: 1,
+        opacity: 0.95,
+      }).addTo(map);
+
+      poly.on("click", () => setSelectedZone(zone));
+      polygonLayersRef.current.push(poly);
+    });
+
+    return () => {
+      // Don't destroy the map on grid redraws, just clean polygons
+    };
+  }, [grid]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="animate-fade-up relative flex flex-col gap-0 map-screen-height overflow-hidden bg-[#0F3D3D]">
       {/* Header overlaying map */}
@@ -161,39 +218,10 @@ export function HexMap() {
 
       {/* Leaflet Hex Grid — fills all remaining height */}
       <div className="flex-1 w-full relative" style={{ minHeight: 0 }}>
-        {/* Subtle dark overlay to match app theme (placed over the map, under the UI) */}
-        <div className="absolute inset-0 pointer-events-none z-[400]" style={{ background: "rgba(15,61,61,0.3)" }} />
-
-        <MapContainer
-          center={[12.3051, 76.6450]} // Mysuru Palace
-          zoom={13}
-          zoomControl={false}
-          style={{ height: "100%", width: "100%" }}
-        >
-          <TileLayer
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            attribution="Tiles &copy; Esri"
-          />
-          
-          {grid.map((zone) => (
-            <Polygon
-              key={`${zone.row}-${zone.col}`}
-              positions={zone.polygon}
-              pathOptions={{
-                color: hexStatusStrokes[zone.status],
-                fillColor: hexStatusColors[zone.status],
-                fillOpacity: 1,
-                weight: selectedZone?.row === zone.row && selectedZone?.col === zone.col ? 3 : 1,
-                opacity: 0.95,
-              }}
-              eventHandlers={{
-                click: () => {
-                  setSelectedZone(zone);
-                },
-              }}
-            />
-          ))}
-        </MapContainer>
+        {/* Subtle dark overlay */}
+        <div className="absolute inset-0 pointer-events-none z-[400]" style={{ background: "rgba(15,61,61,0.25)" }} />
+        {/* The actual map container */}
+        <div ref={mapContainerRef} style={{ height: "100%", width: "100%" }} />
       </div>
 
       {/* Zone Detail Modal */}
