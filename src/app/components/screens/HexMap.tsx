@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { useApp, useColors } from "../../context/AppContext";
+import { useGame } from "../../store/GameStore";
+import { ZONE_DEFS, getHexDisplayStatus } from "../../engine/hexmap";
 
 type HexStatus = "explored" | "active" | "gem" | "locked";
 
@@ -8,10 +10,12 @@ interface HexZone {
   row: number;
   col: number;
   status: HexStatus;
+  zoneId: string;
   zoneName: string;
   digipinCode: string;
+  multiplier: "1.5×" | "2.0×" | "2.5×" | "3.0×";
+  gemId: number | null;
   density: "High" | "Medium" | "Low";
-  multiplier: "1×" | "2×" | "3×";
   gemsCount: number;
   safetyScore: number;
 }
@@ -23,56 +27,6 @@ const hexStatusColors: Record<HexStatus, string> = {
   locked: "rgba(255,255,255,0.15)",
 };
 
-const zoneNames = [
-  "Heritage Core", "Artisan Quarter", "Street Food Belt", "Silk District",
-  "Temple Row", "Palace Ring", "River Walk", "Fort Zone",
-  "Agrahara", "Lakshmipuram", "Chamundipuram", "Nazarbad",
-  "Gandhi Square", "Sayyaji Road", "Devaraja West", "Devaraja East",
-  "Kukkarahalli", "CFTRI Zone", "Irwin Road", "Ashoka Belt",
-  "Vontikoppal", "Kuvempunagar", "Jayalakshmipuram", "Gokulam",
-  "Srirampura", "Bannimantap", "Bogadi", "Hootagalli",
-  "Mysore North", "Hebbal", "Vijayanagara", "Dattagalli",
-];
-
-const digipins = [
-  "MYS-4N2K", "MYS-7R8P", "MYS-1F5Q", "MYS-9G3M",
-  "MYS-2P6J", "MYS-8K1T", "MYS-5L4W", "MYS-3H7N",
-];
-
-const densities: ("High" | "Medium" | "Low")[] = ["High", "Medium", "Low"];
-const multipliers: ("1×" | "2×" | "3×")[] = ["1×", "2×", "3×"];
-
-// Generate a deterministic grid
-function buildGrid(): HexZone[][] {
-  const rows = 8;
-  const cols = 9;
-  const statuses: HexStatus[] = ["explored", "explored", "explored", "active", "gem", "locked", "locked"];
-  const grid: HexZone[][] = [];
-  let nameIdx = 0;
-  for (let r = 0; r < rows; r++) {
-    grid[r] = [];
-    for (let c = 0; c < cols; c++) {
-      const statusIdx = (r * cols + c * 3) % statuses.length;
-      const status = statuses[statusIdx];
-      grid[r][c] = {
-        row: r,
-        col: c,
-        status,
-        zoneName: zoneNames[nameIdx % zoneNames.length],
-        digipinCode: digipins[(r + c) % digipins.length],
-        density: densities[(r + c) % 3],
-        multiplier: multipliers[(r * 2 + c) % 3],
-        gemsCount: status === "gem" ? Math.floor(Math.random() * 3 + 1) : status === "active" ? 1 : 0,
-        safetyScore: 3 + ((r + c) % 3),
-      };
-      nameIdx++;
-    }
-  }
-  return grid;
-}
-
-const GRID = buildGrid();
-
 const densityConfig = {
   High: { color: "#dc2626", bg: "rgba(220,38,38,0.1)" },
   Medium: { color: "#d97706", bg: "rgba(217,119,6,0.1)" },
@@ -80,9 +34,10 @@ const densityConfig = {
 };
 
 const multiplierConfig = {
-  "1×": { color: "#7A6A55", bg: "rgba(122,106,85,0.1)" },
-  "2×": { color: "#E07B2A", bg: "rgba(224,123,42,0.12)" },
-  "3×": { color: "#C9921F", bg: "rgba(201,146,31,0.15)" },
+  "1.5×": { color: "#7A6A55", bg: "rgba(122,106,85,0.1)" },
+  "2.0×": { color: "#E07B2A", bg: "rgba(224,123,42,0.12)" },
+  "2.5×": { color: "#C9921F", bg: "rgba(201,146,31,0.15)" },
+  "3.0×": { color: "#FFD700", bg: "rgba(255,215,0,0.15)" },
 };
 
 export function HexMap() {
@@ -91,33 +46,65 @@ export function HexMap() {
   const navigate = useNavigate();
   const [selectedZone, setSelectedZone] = useState<HexZone | null>(null);
   
-  // Real-time grid state
-  const [grid, setGrid] = useState<HexZone[][]>(buildGrid);
+  const { allGems, visitedGemIds, isZoneUnlockedFn, stats } = useGame();
 
-  // Simulate real-time activity (other players exploring)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setGrid((prevGrid) => {
-        const newGrid = [...prevGrid.map(row => [...row])];
-        
-        // Pick a random hex to update
-        const r = Math.floor(Math.random() * newGrid.length);
-        const c = Math.floor(Math.random() * newGrid[0].length);
-        
-        const currentStatus = newGrid[r][c].status;
-        
-        // Cycle status to simulate activity
-        if (currentStatus === "locked") newGrid[r][c].status = "active";
-        else if (currentStatus === "active") newGrid[r][c].status = "gem";
-        else if (currentStatus === "gem") newGrid[r][c].status = "explored";
-        else if (currentStatus === "explored" && Math.random() > 0.8) newGrid[r][c].status = "active";
-        
-        return newGrid;
-      });
-    }, 2000); // Update every 2 seconds
+  // Generate real-time grid based on game state
+  const grid = useMemo(() => {
+    const rows = 8;
+    const cols = 9;
+    const g: HexZone[][] = [];
     
-    return () => clearInterval(interval);
-  }, []);
+    // Hardcode some visually pleasing gem coordinates (10 gems total)
+    const gemCoords: Record<string, number> = {
+      "1,2": 1, "2,5": 2, "4,3": 3, "6,1": 4, "5,7": 5,
+      "7,4": 6, "2,8": 7, "0,6": 8, "3,0": 9, "6,8": 10
+    };
+
+    for (let r = 0; r < rows; r++) {
+      g[r] = [];
+      for (let c = 0; c < cols; c++) {
+        // Distribute the 5 zones in patches based on row/col
+        const zoneIdx = Math.floor((r / rows) * 2.5 + (c / cols) * 2.5) % ZONE_DEFS.length;
+        const zone = ZONE_DEFS[zoneIdx];
+        
+        const gemId = gemCoords[`${r},${c}`] || null;
+        const gemData = gemId ? allGems.find(x => x.id === gemId) : null;
+        
+        const isUnlocked = isZoneUnlockedFn(zone.id);
+        const isVisited = gemId ? visitedGemIds.has(gemId) : false;
+        const isLegendary = gemData?.rarityTier === "Epic" || gemData?.rarityTier === "Legendary";
+        
+        // If this hex has a gem, we show its precise status. If it's a generic hex, it acts as "explored" if the user has visited ANY gems in this zone, otherwise "active" or "locked"
+        // Wait, for empty tiles, let's just make them 'explored' if unlocked, or 'locked' if locked.
+        let status: HexStatus = "locked";
+        
+        if (gemId) {
+          status = getHexDisplayStatus(isUnlocked, isVisited, isLegendary);
+        } else {
+          status = isUnlocked ? "active" : "locked";
+          // Add some visual noise: 30% of unlocked empty tiles look "explored"
+          if (isUnlocked && ((r * 7 + c * 3) % 10) > 6) {
+             status = "explored";
+          }
+        }
+
+        g[r][c] = {
+          row: r,
+          col: c,
+          status,
+          zoneId: zone.id,
+          zoneName: zone.name,
+          digipinCode: zone.digipinCode || `MYS-${r}${c}X`,
+          multiplier: `${zone.multiplier.toFixed(1)}×` as any,
+          gemId,
+          density: "Medium",
+          gemsCount: gemId ? 1 : 0,
+          safetyScore: 4,
+        };
+      }
+    }
+    return g;
+  }, [allGems, visitedGemIds, isZoneUnlockedFn]);
 
   const hexW = 52;
   const hexH = 60;
