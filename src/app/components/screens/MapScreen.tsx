@@ -558,7 +558,13 @@ export function MapScreen() {
                     <span>💎</span> View Gem Details
                   </button>
                 ) : (
-                  <button className="font-dm flex-1 pressable flex items-center justify-center gap-2"
+                  <button 
+                    onClick={() => {
+                      if (mapInstanceRef.current) {
+                        mapInstanceRef.current.flyTo([selected.lat, selected.lng], 18, { duration: 1.5 });
+                      }
+                    }}
+                    className="font-dm flex-1 pressable flex items-center justify-center gap-2"
                     style={{ height: 46, borderRadius: 99, background: cfg.color, color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer", boxShadow: `0 4px 16px ${cfg.color}44` }}>
                     <span>🗺️</span> Explore Place
                   </button>
@@ -566,7 +572,7 @@ export function MapScreen() {
                 <button
                   className="pressable flex items-center justify-center"
                   style={{ width: 46, height: 46, borderRadius: "50%", background: C.card, border: `1.5px solid ${C.border}`, cursor: "pointer", fontSize: 20, flexShrink: 0 }}
-                  onClick={() => window.open(`https://maps.google.com/?q=${selected.lat},${selected.lng}`, "_blank")}>
+                  onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selected.name + ' Mysuru')}`, "_blank")}>
                   🧭
                 </button>
               </div>
