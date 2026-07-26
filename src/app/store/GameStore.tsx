@@ -46,6 +46,7 @@ import { shouldRunWeeklyReset, runBloomDecayJob, runSafetyExpiryJob, runSubmissi
 import { localStorage_, LSKey, appCache, CacheKey, TTL, invalidateAfterCheckin, invalidateAfterSafetyChange } from "../engine/cache";
 import { useGems, usePlaces } from "../data/api";
 import { usePlayerStore } from "./usePlayerStore";
+import { useAuth } from "../context/AuthContext";
 import type { GemData } from "../data/api";
 import type { Place as PlaceData } from "../data/places";
 import { calculateSuitabilityMultiplier } from "../engine/weather";

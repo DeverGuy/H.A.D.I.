@@ -5,6 +5,7 @@ import { getBloomColor } from "../../data/gems";
 import { useGame } from "../../store/GameStore";
 import { fetchLiveWeather, getWeatherMatchReason } from "../../engine/weather";
 import type { WeatherCondition } from "../../engine/types";
+import { AudioGuide } from "../ui/AudioGuide";
 
 type Tab = "About" | "Audio Walk" | "Reviews";
 
@@ -987,7 +988,11 @@ export function GemDetail() {
 
             </div>
           </div>
-        </div>
+      )}
+
+      {/* Museum Guide Audio Player */}
+      {gem.audioTranscript && (
+        <AudioGuide transcript={gem.audioTranscript} />
       )}
     </div>
   );
