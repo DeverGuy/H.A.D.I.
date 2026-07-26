@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useColors, useApp } from "../../context/AppContext";
-import { allPlaces, categories, placesByCategory, type PlaceCategory, type Place } from "../../data/places";
+import { categories, type PlaceCategory, type Place } from "../../data/places";
+import { useGame } from "../../store/GameStore";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 
 function ImageCarousel({ place }: { place: Place }) {
@@ -70,11 +71,12 @@ function ImageCarousel({ place }: { place: Place }) {
 export function PlacesScreen() {
   const C = useColors();
   const { savedPlaces, toggleSavedPlace } = useApp();
+  const { allPlaces } = useGame();
   const [selectedCategory, setSelectedCategory] = useState<PlaceCategory | "All">("All");
 
   const displayPlaces = selectedCategory === "All"
     ? allPlaces
-    : placesByCategory(selectedCategory);
+    : allPlaces.filter(p => p.category === selectedCategory);
 
   return (
     <div className="animate-fade-up flex flex-col gap-6 pb-12">

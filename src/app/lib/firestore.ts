@@ -32,7 +32,7 @@ import type {
 
 // ── db instance ───────────────────────────────────────────────────────────────
 import { initializeApp, getApps } from "firebase/app";
-const db = getFirestore(getApps()[0]);
+export const db = getFirestore(getApps()[0]);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function uid(): string {

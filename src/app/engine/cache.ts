@@ -14,93 +14,52 @@ export const TTL = {
   COMMUNITY_POSTS:    2 * 60_000,
 } as const;
 
-// ─── In-memory cache ──────────────────────────────────────────────────────────
-
-class Cache {
-  private store = new Map<string, CacheEntry<unknown>>();
-
-  set<T>(key: string, data: T, ttl: number): void {
-    this.store.set(key, { data, cachedAt: Date.now(), ttl });
-  }
-
-  get<T>(key: string): T | null {
-    const entry = this.store.get(key) as CacheEntry<T> | undefined;
-    if (!entry) return null;
-    if (Date.now() - entry.cachedAt > entry.ttl) {
-      this.store.delete(key);
-      return null;
-    }
-    return entry.data;
-  }
-
-  invalidate(key: string): void {
-    this.store.delete(key);
-  }
-
-  invalidatePrefix(prefix: string): void {
-    for (const key of this.store.keys()) {
-      if (key.startsWith(prefix)) this.store.delete(key);
-    }
-  }
-
-  isStale(key: string, nowMs?: number): boolean {
-    const entry = this.store.get(key);
-    if (!entry) return true;
-    return (nowMs ?? Date.now()) - entry.cachedAt > entry.ttl;
-  }
-
-  clear(): void {
-    this.store.clear();
-  }
-}
-
-// Single shared instance
-export const appCache = new Cache();
+import { queryClient } from '../lib/queryClient';
 
 // ─── Cache key builders ────────────────────────────────────────────────────────
 
 export const CacheKey = {
-  gemList:           () => "gem_list",
-  gemBloom:          (gemId: number) => `gem_bloom_${gemId}`,
-  weeklyLeaderboard: () => "leaderboard_weekly",
-  allTimeLeaderboard:() => "leaderboard_alltime",
-  zoneLeaderboard:   (zoneId: string) => `leaderboard_zone_${zoneId}`,
-  zoneStats:         (zoneId: string) => `zone_stats_${zoneId}`,
-  safetyReports:     () => "safety_reports",
-  communityPosts:    () => "community_posts",
-  userProfile:       (userId: string) => `profile_${userId}`,
-  events:            () => "events",
+  gemList:           () => ["gem_list"],
+  gemBloom:          (gemId: number) => ["gem_bloom", gemId],
+  weeklyLeaderboard: () => ["leaderboard_weekly"],
+  allTimeLeaderboard:() => ["leaderboard_alltime"],
+  zoneLeaderboard:   (zoneId: string) => ["leaderboard_zone", zoneId],
+  zoneStats:         (zoneId: string) => ["zone_stats", zoneId],
+  safetyReports:     () => ["safety_reports"],
+  communityPosts:    () => ["community_posts"],
+  userProfile:       (userId: string) => ["profile", userId],
+  events:            () => ["events"],
 };
 
 // ─── Invalidation rules ────────────────────────────────────────────────────────
 
 /** Call after any check-in in a zone */
 export function invalidateAfterCheckin(gemId: number, zoneId: string): void {
-  appCache.invalidate(CacheKey.gemBloom(gemId));
-  appCache.invalidate(CacheKey.weeklyLeaderboard());
-  appCache.invalidate(CacheKey.zoneStats(zoneId));
+  queryClient.invalidateQueries({ queryKey: CacheKey.gemBloom(gemId) });
+  queryClient.invalidateQueries({ queryKey: CacheKey.weeklyLeaderboard() });
+  queryClient.invalidateQueries({ queryKey: CacheKey.zoneStats(zoneId) });
 }
 
 /** Call after a new gem is accepted or edited */
 export function invalidateAfterGemChange(): void {
-  appCache.invalidate(CacheKey.gemList());
+  queryClient.invalidateQueries({ queryKey: CacheKey.gemList() });
 }
 
 /** Call after any safety report changes status */
 export function invalidateAfterSafetyChange(): void {
-  appCache.invalidate(CacheKey.safetyReports());
+  queryClient.invalidateQueries({ queryKey: CacheKey.safetyReports() });
 }
 
 /** Call on weekly reset */
 export function invalidateOnWeeklyReset(): void {
-  appCache.invalidate(CacheKey.weeklyLeaderboard());
-  appCache.invalidatePrefix("leaderboard_zone_");
-  appCache.invalidatePrefix("zone_stats_");
+  queryClient.invalidateQueries({ queryKey: CacheKey.weeklyLeaderboard() });
+  queryClient.invalidateQueries({ queryKey: ["leaderboard_zone"] });
+  queryClient.invalidateQueries({ queryKey: ["zone_stats"] });
 }
 
 /** Call on logout */
 export function invalidateOnLogout(userId: string): void {
-  appCache.invalidate(CacheKey.userProfile(userId));
+  queryClient.invalidateQueries({ queryKey: CacheKey.userProfile(userId) });
 }
 
 // ─── localStorage persistence (client-side) ───────────────────────────────────

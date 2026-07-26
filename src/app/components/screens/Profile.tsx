@@ -3,9 +3,8 @@ import { useNavigate } from "react-router";
 import { useApp, useColors } from "../../context/AppContext";
 import { useGame } from "../../store/GameStore";
 import { useAuth } from "../../context/AuthContext";
-import { allGems } from "../../data/gems";
-import { allPlaces } from "../../data/places";
 import { LEVELS as ENGINE_LEVELS, BADGE_DEFS } from "../../engine/points";
+import { SeedData } from "../dev/SeedData";
 
 type ProfileTab = "Achievements" | "My Gems" | "Collections" | "Activity";
 
@@ -34,7 +33,7 @@ export function Profile() {
   const C = useColors();
   const { darkMode, toggleDarkMode, localMode, toggleLocalMode, savedGems, toggleSaved, savedPlaces, toggleSavedPlace, userName, setUserName, addToast } = useApp();
   const { signOut, user, sendVerificationEmail, updateUserEmail } = useAuth();
-  const { stats, levelInfo, unlockedBadges, activityLog, visitedGemIds, activateLocalMode, localModeEligibility, leaderboard } = useGame();
+  const { stats, levelInfo, unlockedBadges, activityLog, visitedGemIds, activateLocalMode, localModeEligibility, leaderboard, allGems, allPlaces } = useGame();
 
   const [activeTab, setActiveTab] = useState<ProfileTab>("Achievements");
   const [displayName, setDisplayName] = useState(() => userName || "Explorer");
@@ -72,6 +71,9 @@ export function Profile() {
           </p>
         </div>
       )}
+      
+      {/* Dev Tools (Temporary for Phase 2) */}
+      <SeedData />
 
       {/* Profile Header */}
       <div className="rounded-[28px] overflow-hidden relative" style={{ 

@@ -2,10 +2,10 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { useColors } from "../../context/AppContext";
+import { useApp, useColors } from "../../context/AppContext";
 import { useGame } from "../../store/GameStore";
+import { haversineDistance } from "../../engine/checkin";
 import { getWeatherChoicePrompt } from "../../engine/weather";
-import { allGems } from "../../data/gems";
 
 import { allPlaces } from "../../data/places";
 
@@ -147,7 +147,8 @@ export function MapScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const C = useColors();
-  const { currentWeather, getGemSuitability } = useGame();
+  const { darkMode, savedGems, requestLocation, userCoords } = useApp();
+  const { stats, visitedGemIds, checkinRecords, allGems, getGemSuitability, currentWeather } = useGame();
 
   const mapDivRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);

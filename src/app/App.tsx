@@ -51,10 +51,12 @@ function AuthenticatedApp() {
     }
   }, [uid, isOnboarded]);
 
+  const { allGems } = useGame();
+
   // Geofencing background listener
   useEffect(() => {
-    if (isOnboarded) {
-      startGeofence((gemName, distance) => {
+    if (isOnboarded && allGems && allGems.length > 0) {
+      startGeofence(allGems, (gemName, distance) => {
         addToast("info", `💎 ${gemName} is just ${Math.round(distance)}m away! Open HADI to check in.`);
       });
       return () => stopGeofence();

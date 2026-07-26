@@ -56,8 +56,10 @@ function QRScanInner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleManualVerify = async (code: string) => {
+    if (scanCompleted) return;
+    setScanCompleted(true);
     setErrorMessage("");
-    const result = doCheckin(gemId, "qr", undefined, 5, code);
+    const result = await doCheckin(gemId, "qr", undefined, 5, code);
     
     if (result.valid) {
       if (scannerRef.current) scannerRef.current.stop();
@@ -66,6 +68,7 @@ function QRScanInner() {
     } else {
       setErrorMessage(result.reason || "Invalid Check-in.");
       addToast("warning", result.reason || "Check-in failed.");
+      setTimeout(() => setScanCompleted(false), 2000);
     }
   };
 

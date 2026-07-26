@@ -1,7 +1,5 @@
-import { allGems } from "../data/gems";
 import { haversineDistance } from "./checkin";
-import type { Coords } from "./types";
-import type { GemState } from "./types";
+import type { Coords, GemData } from "./types";
 
 const NOTIFICATION_RADIUS = 200; // Notify when within 200m
 const GEOFENCE_COOLDOWN = 12 * 60 * 60 * 1000; // 12 hours cooldown per gem
@@ -13,7 +11,7 @@ const notifiedGems = new Map<number, number>(); // gemId -> timestamp
 // ─── Spatial Hash Grid ────────────────────────────────────────────────────────
 
 // Map "lat,lng" cell key -> Array of gems in that cell
-const spatialGrid = new Map<string, typeof allGems>();
+const spatialGrid = new Map<string, GemData[]>();
 
 function getCellKey(lat: number, lng: number): string {
   const cellLat = Math.floor(lat / GRID_CELL_SIZE);
@@ -21,14 +19,16 @@ function getCellKey(lat: number, lng: number): string {
   return `${cellLat},${cellLng}`;
 }
 
-// Pre-compute spatial grid at module load time (O(N) once)
-allGems.forEach(gem => {
-  const key = getCellKey(gem.coords.lat, gem.coords.lng);
-  if (!spatialGrid.has(key)) {
-    spatialGrid.set(key, []);
-  }
-  spatialGrid.get(key)!.push(gem);
-});
+export function initGeofenceGrid(allGems: GemData[]) {
+  spatialGrid.clear();
+  allGems.forEach(gem => {
+    const key = getCellKey(gem.coords.lat, gem.coords.lng);
+    if (!spatialGrid.has(key)) {
+      spatialGrid.set(key, []);
+    }
+    spatialGrid.get(key)!.push(gem);
+  });
+}
 
 /**
  * Returns gems in the user's cell and the 8 adjacent cells (O(1) lookup).
@@ -37,7 +37,7 @@ function getNearbyGemsFromGrid(lat: number, lng: number) {
   const cellLat = Math.floor(lat / GRID_CELL_SIZE);
   const cellLng = Math.floor(lng / GRID_CELL_SIZE);
   
-  const nearby: typeof allGems = [];
+  const nearby: GemData[] = [];
   
   for (let dLat = -1; dLat <= 1; dLat++) {
     for (let dLng = -1; dLng <= 1; dLng++) {
@@ -51,13 +51,15 @@ function getNearbyGemsFromGrid(lat: number, lng: number) {
   return nearby;
 }
 
-export function startGeofence(onNearGem: (gemName: string, distance: number) => void) {
+export function startGeofence(allGems: GemData[], onNearGem: (gemName: string, distance: number) => void) {
   if (!("geolocation" in navigator)) return;
   if (!("Notification" in window)) return;
 
   Notification.requestPermission();
 
   if (watchId !== null) return;
+  
+  initGeofenceGrid(allGems);
 
   watchId = navigator.geolocation.watchPosition(
     (position) => {

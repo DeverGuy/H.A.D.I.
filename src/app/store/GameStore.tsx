@@ -29,6 +29,9 @@ import type {
 // ── Engines ──────────────────────────────────────────────────────────────────
 import { calculatePoints, getLevelInfo, updateStreak, checkNewBadges, BADGE_DEFS, sumBadgeBonuses } from "../engine/points";
 import { recalcBloomNow, incrementBloomCapacity, applyBloomBoost, getBloomStatus, getBloomColor } from "../engine/bloom";
+import BloomWorker from "../engine/bloom.worker?worker";
+
+const bloomWorker = new BloomWorker();
 import { verifyCheckin, haversineDistance, getProximityMultiplier } from "../engine/checkin";
 import { getZoneMultiplier, ZONE_DEFS, isZoneUnlocked, getZoneCompletion } from "../engine/hexmap";
 import { castVote, calculateKarma, checkLocalExpertEligibility } from "../engine/community";
@@ -41,8 +44,10 @@ import { checkLocalModeEligibility, getPermissions, hasPermission } from "../eng
 import { createNotification, createActivityEntry, pruneOldNotifications, pruneOldActivity, markRead, markAllRead, getUnreadCount, notifyCheckin, notifyBadge, notifyLevelUp, notifyGemAccepted, notifySafetyConfirmed, notifyBloomChanged } from "../engine/notifications";
 import { shouldRunWeeklyReset, runBloomDecayJob, runSafetyExpiryJob, runSubmissionExpiryJob, checkStreakBreak, sanitizeText, clampBloom } from "../engine/consistency";
 import { localStorage_, LSKey, appCache, CacheKey, TTL, invalidateAfterCheckin, invalidateAfterSafetyChange } from "../engine/cache";
-import { allGems } from "../data/gems";
-import { allPlaces } from "../data/places";
+import { useGems, usePlaces } from "../data/api";
+import { usePlayerStore } from "./usePlayerStore";
+import type { GemData } from "../data/api";
+import type { Place as PlaceData } from "../data/places";
 import { calculateSuitabilityMultiplier } from "../engine/weather";
 import { syncEngine } from "../engine/sync";
 import type { WeatherData } from "../engine/types";
@@ -80,36 +85,15 @@ function seedStats(): UserStats {
   };
 }
 
-// Real place coordinates lookup from places.ts data
-const PLACE_COORDS: Record<number, { lat: number; lng: number }> = {};
-for (const p of allPlaces) {
-  if (p.lat != null && p.lng != null) {
-    PLACE_COORDS[p.id] = { lat: p.lat, lng: p.lng };
-  }
-}
 
-function seedGemStates(): Map<number, GemState> {
-  const map = new Map<number, GemState>();
-  for (const g of allGems) {
-    // Use real coordinates from allPlaces, then fallback to city center
-    const realCoords = PLACE_COORDS[g.id] ?? { lat: 12.3052, lng: 76.6551 };
-    map.set(g.id, {
-      id: g.id,
-      rarityTier: g.rarityTier,
-      bloomCapacity: g.bloomCapacity,
-      lastVisitTimestamp: null,
-      digipinCode: g.digipinCode,
-      coords: realCoords,
-      category: g.category,
-      basePoints: g.points,
-    });
-  }
-  return map;
-}
 
 // ─── Context type ─────────────────────────────────────────────────────────────
 
 interface GameContextType {
+  // ── Database ──────────────────────────────────────────────────────────────
+  allGems: GemData[];
+  allPlaces: PlaceData[];
+
   // ── User ─────────────────────────────────────────────────────────────────
   stats: UserStats;
   levelInfo: ReturnType<typeof getLevelInfo>;
@@ -118,7 +102,7 @@ interface GameContextType {
 
   // ── Gems ──────────────────────────────────────────────────────────────────
   gemStates: Map<number, GemState>;
-  getGemBloom: (id: number) => { capacity: number; status: ReturnType<typeof getBloomStatus>; color: string };
+  getGemBloom: (id: number) => Promise<{ capacity: number; status: ReturnType<typeof getBloomStatus>; color: string }>;
 
   // ── Check-in ──────────────────────────────────────────────────────────────
   checkinRecords: CheckinRecord[];
@@ -224,29 +208,43 @@ export function useGame() {
 
 export function GameProvider({ children, userId }: { children: ReactNode; userId?: string }) {
   // ── Core state ─────────────────────────────────────────────────────────────
-  const [stats, setStats] = useState<UserStats>(() => {
-    const saved = localStorage_.get<UserStats>(LSKey.userStats);
-    if (saved) return saved;
-    const fresh = seedStats();
-    if (userId) fresh.userId = userId;
-    return fresh;
-  });
+  const stats = usePlayerStore((state) => state.stats);
+  const setStats = usePlayerStore((state) => state.setStats);
+  const unlockedBadges = usePlayerStore((state) => state.unlockedBadges);
+  const setUnlockedBadges = usePlayerStore((state) => state.setUnlockedBadges);
+  
+  const { data: allGems = [] } = useGems();
+  const { data: allPlaces = [] } = usePlaces();
 
-  const [unlockedBadges, setUnlockedBadges] = useState<Set<string>>(() => {
-    const saved = localStorage_.get<string[]>(LSKey.unlockedBadges);
-    return new Set(saved ?? []);
-  });
+  const [gemStates, setGemStates] = useState<Map<number, GemState>>(new Map());
+  
+  const checkinRecords = usePlayerStore((state) => state.checkinRecords);
+  const setCheckinRecords = usePlayerStore((state) => state.setCheckinRecords);
+  const visitedGemIds = usePlayerStore((state) => state.visitedGemIds);
+  const setVisitedGemIds = usePlayerStore((state) => state.setVisitedGemIds);
 
-  const [gemStates, setGemStates] = useState<Map<number, GemState>>(seedGemStates);
-
-  const [checkinRecords, setCheckinRecords] = useState<CheckinRecord[]>(() => {
-    return localStorage_.get<CheckinRecord[]>(LSKey.checkinRecords) ?? [];
-  });
-
-  const [visitedGemIds, setVisitedGemIds] = useState<Set<number>>(() => {
-    const saved = localStorage_.get<number[]>(LSKey.visitedGems);
-    return new Set(saved ?? []);
-  });
+  useEffect(() => {
+    if (allGems.length === 0 || allPlaces.length === 0) return;
+    const placeCoords: Record<number, { lat: number; lng: number }> = {};
+    for (const p of allPlaces) {
+      if (p.lat != null && p.lng != null) placeCoords[p.id] = { lat: p.lat, lng: p.lng };
+    }
+    const map = new Map<number, GemState>();
+    for (const g of allGems) {
+      const realCoords = placeCoords[g.id] ?? { lat: 12.3052, lng: 76.6551 };
+      map.set(g.id, {
+        id: g.id,
+        rarityTier: g.rarityTier,
+        bloomCapacity: g.bloomCapacity,
+        lastVisitTimestamp: null,
+        digipinCode: g.digipinCode,
+        coords: realCoords,
+        category: g.category,
+        basePoints: g.points,
+      });
+    }
+    setGemStates(map);
+  }, [allGems, allPlaces]);
 
   // ── Weather state ──────────────────────────────────────────────────────────
   const [currentWeather, setMockWeather] = useState<WeatherData>({
@@ -624,11 +622,20 @@ export function GameProvider({ children, userId }: { children: ReactNode; userId
   // ─────────────────────────────────────────────────────────────────────────
   // GEM BLOOM
   // ─────────────────────────────────────────────────────────────────────────
-  const getGemBloom = useCallback((id: number) => {
+  const getGemBloom = useCallback(async (id: number) => {
     const gem = gemStates.get(id);
-    if (!gem) return { capacity: 0, status: "Dormant" as const, color: "#9ca3af" };
-    const { capacity, status } = recalcBloomNow(gem);
-    return { capacity, status, color: getBloomColor(status) };
+    if (!gem) return { capacity: 0, status: getBloomStatus(0), color: getBloomColor(getBloomStatus(0)) };
+    
+    return new Promise<{ capacity: number; status: ReturnType<typeof getBloomStatus>; color: string }>((resolve) => {
+      const handler = (e: MessageEvent) => {
+        if (e.data.id === id) {
+          bloomWorker.removeEventListener("message", handler);
+          resolve({ ...e.data.result, color: getBloomColor(e.data.result.status) });
+        }
+      };
+      bloomWorker.addEventListener("message", handler);
+      bloomWorker.postMessage({ id, gem });
+    });
   }, [gemStates]);
 
   const applyBloomBoostFn = useCallback((gemId: number) => {
@@ -970,6 +977,7 @@ export function GameProvider({ children, userId }: { children: ReactNode; userId
   // ─────────────────────────────────────────────────────────────────────────
 
   const value: GameContextType = {
+    allGems, allPlaces,
     stats, levelInfo, unlockedBadges, permissions,
     gemStates, getGemBloom,
     checkinRecords, visitedGemIds, doCheckin, lastCheckinResult,

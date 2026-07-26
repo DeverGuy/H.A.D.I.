@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useApp, useColors } from "../../context/AppContext";
 import { useGame } from "../../store/GameStore";
-import { allGems, getBloomColor } from "../../data/gems";
+import { getBloomColor } from "../../data/gems";
 import { SkeletonCard, SkeletonGemCard } from "../Skeleton";
 import { haversineDistance } from "../../engine/checkin";
 import { fetchLiveWeather } from "../../engine/weather";
@@ -97,7 +97,11 @@ function HexGrid() {
 }
 
 // Search Results view - upgraded with masonry + suggestions
-function SearchResults({ query, C, navigate, toggleSaved, isSaved }: { query: string; C: ReturnType<typeof useColors>; navigate: ReturnType<typeof useNavigate>; toggleSaved: (id: number) => void; isSaved: (id: number) => boolean }) {
+function SearchResults({ query }: { query: string }) {
+  const navigate = useNavigate();
+  const C = useColors();
+  const { toggleSaved, isSaved } = useApp();
+  const { allGems } = useGame();
   const [activeFilter, setActiveFilter] = useState("All");
   const results = allGems.filter((g) =>
     g.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -176,7 +180,7 @@ export function Home() {
   const location = useLocation();
   const C = useColors();
   const { addToast, toggleSaved, isSaved, userName, userCoords, locationStatus, requestLocation, buddySystemEnabled, toggleBuddySystem } = useApp();
-  const { stats, leaderboard, visitedGemIds } = useGame();
+  const { stats, leaderboard, visitedGemIds, allGems } = useGame();
   const myRank = leaderboard.find((e) => e.userId === stats.userId)?.rank ?? "—";
 
   // ── Safety Buddy System Logic ────────────────────────────────────────────────
@@ -578,7 +582,7 @@ export function Home() {
 
       {/* Search results or normal content */}
       {isSearching ? (
-        <SearchResults query={searchQuery} C={C} navigate={navigate} toggleSaved={toggleSaved} isSaved={isSaved} />
+        <SearchResults query={searchQuery} />
       ) : (
         <>
           {/* Category Filter Pills */}

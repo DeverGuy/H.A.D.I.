@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useApp, useColors } from "../../context/AppContext";
-import { allGems, getBloomColor } from "../../data/gems";
+import { getBloomColor } from "../../data/gems";
 import { useGame } from "../../store/GameStore";
 import { fetchLiveWeather, getWeatherMatchReason } from "../../engine/weather";
 import type { WeatherCondition } from "../../engine/types";
@@ -41,7 +41,7 @@ export function GemDetail() {
   const navigate = useNavigate();
   const { addToast, toggleSaved, isSaved } = useApp();
   const C = useColors();
-  const { doCheckin, gemStates, visitedGemIds } = useGame();
+  const { doCheckin, gemStates, visitedGemIds, allGems } = useGame();
 
   const gem = allGems.find((g) => g.id === Number(id));
   const isVisited = gem ? visitedGemIds.has(gem.id) : false;
@@ -127,8 +127,8 @@ export function GemDetail() {
 
           // 3. Call the real check-in engine with real user coordinates
           setCheckinStage("minting");
-          setTimeout(() => {
-            const res = doCheckin(gem.id, "gps", userCoords, accuracy);
+          setTimeout(async () => {
+            const res = await doCheckin(gem.id, "gps", userCoords, accuracy);
             if (res.valid) {
               setMintedPoints(res.pointsAwarded ?? gem.points);
               setRealDistance(null);

@@ -1,8 +1,7 @@
-import type { Coords, CheckinRecord, CheckinResult, GemState, UserStats, WeatherData } from "./types";
+import type { Coords, CheckinRecord, CheckinResult, GemState, UserStats, WeatherData, GemData } from "./types";
 import { getBloomStatus, getBloomMultiplier, incrementBloomCapacity } from "./bloom";
 import { calculatePoints, updateStreak, getLevelInfo, checkNewBadges } from "./points";
 import { getZoneMultiplier } from "./hexmap";
-import { allGems } from "../data/gems";
 import { calculateSuitabilityMultiplier } from "./weather";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -187,6 +186,7 @@ export interface VerifyCheckinInput {
   gpsAccuracy: number;
   method: "gps" | "qr";
   gem: GemState;
+  gemData?: GemData;
   stats: UserStats;
   isBuddyActive: boolean;
   unlockedBadges: Set<string>;
@@ -250,7 +250,7 @@ export function verifyCheckin(input: VerifyCheckinInput): CheckinResult {
   const zoneMultiplier = getZoneMultiplier(input.gem.digipinCode);
 
   // ── Weather multiplier ────────────────────────────────────────────────────
-  const gemData = allGems.find((g) => g.id === input.gem.id);
+  const gemData = input.gemData;
   // Default to outdoor exposed if gem not found (e.g., dynamically submitted community gem)
   const weatherProfile = gemData?.weatherProfile ?? {
     type: "OUTDOOR_EXPOSED",
