@@ -108,7 +108,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"Every morning before the city wakes, I wake. The pigments are ground the night before — turmeric for gold, charcoal for black, sindoor for red. The lane becomes my canvas and each pattern I draw tells a story from the Puranas. This particular design, the Ashta Dala Padma, is dedicated to Chamundeshwari Devi...\"",
     image: "https://images.unsplash.com/photo-1766560359378-191334d5ecc6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1766560359378-191334d5ecc6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Sayyaji+Rao+Rd,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Sayyaji+Rao+Rd,Mysuru",
   }),
   g({
     id: 2, emoji: "🍛",
@@ -124,7 +124,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"My grandfather started this with a single wood-fired stove in 1962. We have never changed the recipe — not one gram of the sambar masala ratio. The trick is the tamarind, always from Udupi, soaked overnight in copper vessels. We grind the batter by stone, not machine. 50 plates. That is all. When it is done, we close.\"",
     image: "https://images.unsplash.com/photo-1657196118354-f25f29fe636d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1657196118354-f25f29fe636d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Agrahara+Lane,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Agrahara+Lane,Mysuru",
   }),
   g({
     id: 3, emoji: "🛕",
@@ -140,7 +140,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"This temple has been in my family's care for eleven generations. The shivalinga here is a swayambhu — self-manifested, not carved by human hands. Each morning at 5:30 we wake the Lord with panchamrita abhisheka. The stonework around the outer wall was commissioned by the Mysore Wadiyars in 1724...\"",
     image: "https://images.unsplash.com/photo-1668948824982-37c263b8dfb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1668948824982-37c263b8dfb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Lakshmipuram,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Lakshmipuram,Mysuru",
   }),
   g({
     id: 4, emoji: "🧶",
@@ -156,7 +156,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"The wood we use is only from the Aale tree — what you call ivory wood. It absorbs the lac without cracking. My grandfather learned this from the royal court craftsmen. We were asked to supply to Hamleys London in 1998 but we refused — to mass-produce would kill the art.\"",
     image: "https://images.unsplash.com/photo-1630833835852-aa4902568d93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1630833835852-aa4902568d93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Devaraja+Market,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Devaraja+Market,Mysuru",
   }),
   g({
     id: 5, emoji: "🛤️",
@@ -172,7 +172,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"This lane was originally built for the officers of the Mysore Lancers regiment in 1892. Notice the teak-framed windows — the same carpenter family has been maintaining them for four generations. The carriage workshop at the end still has original British-era tools hanging on its walls.\"",
     image: "https://images.unsplash.com/photo-1754230048672-392f093047d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1754230048672-392f093047d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Fort+Area,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Fort+Area,Mysuru",
   }),
   g({
     id: 6, emoji: "🕌",
@@ -188,7 +188,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"My family has lived on this lane for seven generations. This archway — see the pointed apex? That is pure Tipu Sultan style, built around 1790. The balcony above it is British, added in 1905. And the tile mosaic on the wall there? Portuguese craftsmen, 1840s. This one lane holds 200 years of Mysuru.\"",
     image: "https://images.unsplash.com/photo-1702966346232-2797620e1992?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1702966346232-2797620e1992?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Nazarbad,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Nazarbad,Mysuru",
   }),
   g({
     id: 7, emoji: "☕",
@@ -204,7 +204,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"60% arabica, 35% robusta, 5% chicory. That is the ratio. I will not write it down — only my son knows. The chicory makes it bitter-sweet, not bitter. My grandfather brought the recipe from a plantation estate in Coorg where he worked at 16. We roast every Tuesday morning at 4 AM — you can smell it from the main road.\"",
     image: "https://images.unsplash.com/photo-1758387941825-a6ecaec9c14d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1758387941825-a6ecaec9c14d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Gandhi+Square,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Gandhi+Square,Mysuru",
   }),
   g({
     id: 8, emoji: "🎭",
@@ -220,7 +220,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"A single puppet takes me 21 days. The head is carved from jackfruit wood — it must be dried for two years first. The eyes are painted last, always on a full moon day. I am 71 years old and I have made 3,400 puppets. My fingers know the form before my mind does. When I die, no one in Karnataka will know how to make these exactly as I do.\"",
     image: "https://images.unsplash.com/photo-1773165139451-bb2fe8bb6ec3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1773165139451-bb2fe8bb6ec3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Chamundipuram,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Chamundipuram,Mysuru",
   }),
   g({
     id: 9, emoji: "🌿",
@@ -236,7 +236,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"This bund was built in 1864 by the Mysore Maharaja. The 200+ species here include 28 that are critically endangered elsewhere. The purple moorhen at 7 o'clock — see it? It's building a nest right now. In 2019 we documented a Siberian crane here, thousands of kilometers from its migration route. The lake remembered something even the bird forgot.\"",
     image: "https://images.unsplash.com/photo-1709351379398-cbc7995354b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1709351379398-cbc7995354b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Near+CFTRI,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Near+CFTRI,Mysuru",
   }),
   g({
     id: 10, emoji: "🧵",
@@ -252,7 +252,7 @@ const detailedGems: GemData[] = [
     audioTranscript: "\"The silk thread comes from Ramanagara — nowhere else. Our family has had the same supplier for four generations. One saree needs 5,600 individual threads to be set up on the loom before a single weft can be thrown. My mother could do this in three hours. I still take four. The sound of the loom — thak-thak-thak — that is the heartbeat of this house.\"",
     image: "https://images.unsplash.com/photo-1712485975136-b63cf7d6b60e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     images: ["https://images.unsplash.com/photo-1712485975136-b63cf7d6b60e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
-    googleMapLink: "https://maps.google.com/?q=Ashoka+Road,Mysuru",
+    googleMapLink: "https://www.google.com/maps/search/?api=1&query=Ashoka+Road,Mysuru",
   }),
 ];
 

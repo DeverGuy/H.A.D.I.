@@ -574,7 +574,7 @@ export function GemDetail() {
                 <button
                   className="font-dm pressable"
                   style={{ background: "#0F3D3D", color: "#E07B2A", border: "none", borderRadius: 99, padding: "10px 20px", cursor: "pointer", fontWeight: 700, fontSize: 13, boxShadow: "0 4px 14px rgba(15,61,61,0.2)" }}
-                  onClick={() => window.open(`https://maps.google.com/?q=${gem.location}+Mysuru`, "_blank")}
+                  onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gem.location + ' Mysuru')}`, "_blank")}
                 >
                   Open in Maps →
                 </button>
