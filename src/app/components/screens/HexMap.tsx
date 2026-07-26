@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useApp, useColors } from "../../context/AppContext";
 
@@ -90,13 +90,41 @@ export function HexMap() {
   const C = useColors();
   const navigate = useNavigate();
   const [selectedZone, setSelectedZone] = useState<HexZone | null>(null);
+  
+  // Real-time grid state
+  const [grid, setGrid] = useState<HexZone[][]>(buildGrid);
+
+  // Simulate real-time activity (other players exploring)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGrid((prevGrid) => {
+        const newGrid = [...prevGrid.map(row => [...row])];
+        
+        // Pick a random hex to update
+        const r = Math.floor(Math.random() * newGrid.length);
+        const c = Math.floor(Math.random() * newGrid[0].length);
+        
+        const currentStatus = newGrid[r][c].status;
+        
+        // Cycle status to simulate activity
+        if (currentStatus === "locked") newGrid[r][c].status = "active";
+        else if (currentStatus === "active") newGrid[r][c].status = "gem";
+        else if (currentStatus === "gem") newGrid[r][c].status = "explored";
+        else if (currentStatus === "explored" && Math.random() > 0.8) newGrid[r][c].status = "active";
+        
+        return newGrid;
+      });
+    }, 2000); // Update every 2 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const hexW = 52;
   const hexH = 60;
   const colGap = 4;
   const rowGap = -14;
-  const rows = GRID.length;
-  const cols = GRID[0].length;
+  const rows = grid.length;
+  const cols = grid[0].length;
   const totalWidth = cols * (hexW + colGap) + hexW / 2 + 8;
   const totalHeight = rows * (hexH + rowGap) + 14;
 
@@ -155,7 +183,7 @@ export function HexMap() {
             height: totalHeight,
           }}
         >
-          {GRID.map((row, rIdx) =>
+          {grid.map((row, rIdx) =>
             row.map((zone, cIdx) => {
               const isOddRow = rIdx % 2 === 1;
               const x = cIdx * (hexW + colGap) + (isOddRow ? (hexW + colGap) / 2 : 0);
